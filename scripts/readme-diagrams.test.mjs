@@ -15,16 +15,37 @@ function read(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
 }
 
-test("README links all three local diagrams", () => {
-  const readme = read("README.md");
-  const linked = [...readme.matchAll(
-    /!\[[^\]]+\]\((assets\/readme\/[^)]+\.svg)\)/g,
-  )].map((match) => path.basename(match[1]));
+test("both README variants link all three local diagrams", () => {
+  for (const readmeName of ["README.md", "README.en.md"]) {
+    const readme = read(readmeName);
+    const linked = [...readme.matchAll(
+      /!\[[^\]]+\]\((assets\/readme\/[^)]+\.svg)\)/g,
+    )].map((match) => path.basename(match[1]));
 
-  assert.deepEqual(linked.sort(), [...diagramNames].sort());
+    assert.deepEqual(
+      linked.sort(),
+      [...diagramNames].sort(),
+      `${readmeName} must link every diagram exactly once`,
+    );
+  }
   for (const name of diagramNames) {
     assert.equal(fs.existsSync(path.join(root, "assets", "readme", name)), true);
   }
+});
+
+test("README variants have reciprocal language navigation and matching structure", () => {
+  const ru = read("README.md");
+  const en = read("README.en.md");
+
+  assert.match(
+    ru,
+    /^<p align="right"><strong>🇷🇺 Русский<\/strong> · <a href="README\.en\.md">🇬🇧 English<\/a><\/p>/,
+  );
+  assert.match(
+    en,
+    /^<p align="right"><a href="README\.md">🇷🇺 Русский<\/a> · <strong>🇬🇧 English<\/strong><\/p>/,
+  );
+  assert.equal((ru.match(/^## /gm) ?? []).length, (en.match(/^## /gm) ?? []).length);
 });
 
 test("diagrams do not restore rejected English labels", () => {

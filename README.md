@@ -1,3 +1,5 @@
+<p align="right"><strong>🇷🇺 Русский</strong> · <a href="README.en.md">🇬🇧 English</a></p>
+
 # AI-native Workspace
 
 AI-native Workspace — среда, готовая к хранению и обновлению через Git. В ней
@@ -88,8 +90,11 @@ runtime/
 skills/
 scripts/
 templates/
+.gitignore
 AGENTS.md
+LICENSE
 README.md
+README.en.md
 START_HERE.md
 examples/
 profiles.json
