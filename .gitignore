@@ -1,0 +1,25 @@
+# Product-managed copies installed into this checkout
+.agents/skills/
+.ai-workspace/engine/
+.ai-workspace/schemas/
+.ai-workspace/policies/
+.ai-workspace/migrations/
+.ai-workspace/fixtures/
+.ai-workspace/AGENT_CONTRACT.md
+.ai-workspace/product.json
+
+# Rebuildable local projections
+.ai-workspace/state/
+.ai-workspace/generated/
+
+# Local tooling and credentials
+node_modules/
+dist/
+.tmp/
+.codex-tmp/
+.env
+.env.*
+*secret*
+*credential*
+
+# Canonical manifests, audit trail and work/** are intentionally trackable.

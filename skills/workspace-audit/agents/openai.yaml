@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workspace Audit"
+  short_description: "Audit accumulated workspace state read-only"
+  default_prompt: "Use $workspace-audit to inspect this workspace and propose safe remediation."

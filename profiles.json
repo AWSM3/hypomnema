@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "product_version": "0.3.0",
+  "profiles": {
+    "reusable-template": {
+      "status": "implemented",
+      "include": [
+        ".codex-plugin/plugin.json",
+        ".gitignore",
+        "LICENSE",
+        "AGENTS.md",
+        "START_HERE.md",
+        "README.md",
+        "VERSION",
+        "profiles.json",
+        "examples/**",
+        "assets/**",
+        "agents/**",
+        "skills/**",
+        "runtime/engine/**",
+        "runtime/schemas/**",
+        "runtime/migrations/**",
+        "runtime/policies/**",
+        "runtime/fixtures/**",
+        "scripts/install-ai-workspace.mjs",
+        "scripts/install-ai-workspace.test.mjs",
+        "scripts/readme-diagrams.test.mjs",
+        "templates/AGENTS.md",
+        "templates/AI_WORKSPACE_CONTRACT.md"
+      ],
+      "exclude": [
+        "**/manifests/**",
+        "**/state/**",
+        "**/generated/**",
+        "**/audit/**",
+        "**/.git/**",
+        "**/.env*",
+        "**/*secret*",
+        "**/*credential*"
+      ]
+    },
+    "handoff": {
+      "status": "planned"
+    },
+    "generated-only": {
+      "status": "planned"
+    },
+    "support-bundle": {
+      "status": "planned"
+    },
+    "full-local": {
+      "status": "planned"
+    }
+  }
+}

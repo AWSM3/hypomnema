@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workspace Orient"
+  short_description: "Restore context and identify the next action"
+  default_prompt: "Use $workspace-orient to restore the current workspace context and next action."

@@ -1,0 +1,32 @@
+{
+  "large_directory_mb": 512,
+  "markdown_link_check": true,
+  "recursive_exclude": [
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".svn",
+    ".venv",
+    "__pycache__",
+    "build",
+    "coverage",
+    "dist",
+    "node_modules",
+    "tmp",
+    "venv"
+  ],
+  "schema_version": 1,
+  "top_level_exclude": [
+    ".ai-workspace",
+    ".agents",
+    ".codex",
+    ".codex-tmp",
+    ".git",
+    ".idea",
+    ".obsidian",
+    ".tmp",
+    "packed"
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workspace Close"
+  short_description: "Close work with handoff and authority evidence"
+  default_prompt: "Use $workspace-close to finish this work item and prepare a handoff."

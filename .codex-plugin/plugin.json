@@ -1,0 +1,33 @@
+{
+  "name": "ai-native-workspace",
+  "version": "0.3.0",
+  "description": "Agent-first local workspace for traceable engineering and analytical work.",
+  "author": {
+    "name": "AI-native Workspace Project"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "codex",
+    "workspace",
+    "agent-first",
+    "determinism",
+    "lifecycle"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AI-native Workspace",
+    "shortDescription": "Run traceable work through an AI agent",
+    "longDescription": "Start, continue, verify and hand off engineering or analytical work while the agent maintains the local workspace lifecycle.",
+    "developerName": "AI-native Workspace Project",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Start a new task from my request and organize the work.",
+      "Continue the current task from its saved state.",
+      "Verify the current result and prepare a handoff."
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "considered_options": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "consequences": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "entity_type": {
+      "const": "decision"
+    },
+    "id": {
+      "minLength": 3,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "status": {
+      "enum": [
+        "proposed",
+        "accepted",
+        "rejected",
+        "superseded"
+      ]
+    },
+    "supersedes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "entity_type",
+    "title",
+    "status",
+    "decision",
+    "evidence"
+  ],
+  "type": "object"
+}

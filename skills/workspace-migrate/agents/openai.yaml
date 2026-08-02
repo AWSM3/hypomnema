@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workspace Migrate"
+  short_description: "Plan and apply approved workspace path migrations"
+  default_prompt: "Use $workspace-migrate to build a collision-checked migration plan and wait for approval before applying it."

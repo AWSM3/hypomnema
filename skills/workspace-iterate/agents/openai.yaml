@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workspace Iterate"
+  short_description: "Run and record a semantic work iteration"
+  default_prompt: "Use $workspace-iterate to start or continue a semantic iteration."

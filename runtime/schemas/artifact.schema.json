@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority": {
+      "enum": [
+        "draft",
+        "candidate",
+        "in-review",
+        "accepted",
+        "authoritative",
+        "superseded",
+        "reference-only"
+      ]
+    },
+    "entity_type": {
+      "const": "artifact"
+    },
+    "confirmed_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "id": {
+      "minLength": 3,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "entity_type",
+    "title",
+    "kind",
+    "path",
+    "role",
+    "authority"
+  ],
+  "type": "object"
+}

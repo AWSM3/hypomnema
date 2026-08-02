@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workspace Task"
+  short_description: "Run work through the AI-native lifecycle"
+  default_prompt: "Use $workspace-task to start or continue this task directly from my request."

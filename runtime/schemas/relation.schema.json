@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "entity_type": {
+      "const": "relation"
+    },
+    "from": {
+      "type": "string"
+    },
+    "id": {
+      "minLength": 3,
+      "type": "string"
+    },
+    "relation_type": {
+      "enum": [
+        "contains",
+        "depends-on",
+        "relates-to",
+        "derived-from",
+        "supersedes",
+        "implements",
+        "verifies",
+        "blocks",
+        "produces",
+        "candidate-match"
+      ]
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "to": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "entity_type",
+    "from",
+    "to",
+    "relation_type"
+  ],
+  "type": "object"
+}

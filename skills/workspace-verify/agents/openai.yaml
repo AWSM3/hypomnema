@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workspace Verify"
+  short_description: "Validate manifests, lineage, links, and outputs"
+  default_prompt: "Use $workspace-verify to validate the workspace and its current outputs."

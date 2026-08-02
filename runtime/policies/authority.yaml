@@ -1,0 +1,16 @@
+{
+  "authoritative_requires": [
+    "evidence",
+    "human_confirmation_or_accepted_decision"
+  ],
+  "schema_version": 1,
+  "states": [
+    "draft",
+    "candidate",
+    "in-review",
+    "accepted",
+    "authoritative",
+    "superseded",
+    "reference-only"
+  ]
+}

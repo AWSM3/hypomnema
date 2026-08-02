@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="820" viewBox="0 0 1600 820" role="img" aria-labelledby="title desc">
+  <title id="title">Агент как единственный интерфейс AI-native Workspace</title>
+  <desc id="desc">Пользователь формулирует задачу естественным языком, агент создаёт и поддерживает рабочую систему, возвращая проверяемый результат и следующий шаг.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#091016"/>
+      <stop offset="0.55" stop-color="#0D171D"/>
+      <stop offset="1" stop-color="#101B20"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#D8FF5F" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#D8FF5F" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#7D929D" stroke-opacity="0.08"/>
+    </pattern>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000" flood-opacity="0.42"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#D8FF5F"/>
+    </marker>
+    <style>
+      .sans{font-family:'IBM Plex Sans','Avenir Next','Segoe UI',sans-serif}
+      .mono{font-family:'IBM Plex Mono','Cascadia Mono',monospace}
+      .muted{fill:#91A1AA}
+      .light{fill:#F3F1E8}
+      .lime{fill:#D8FF5F}
+      .cyan{fill:#68D8E8}
+    </style>
+  </defs>
+  <rect width="1600" height="820" fill="url(#bg)"/>
+  <rect width="1600" height="820" fill="url(#grid)"/>
+  <ellipse cx="805" cy="420" rx="330" ry="300" fill="url(#glow)"/>
+
+  <text x="84" y="74" class="mono lime" font-size="18" letter-spacing="3">01 / АГЕНТ — ЕДИНЫЙ ИНТЕРФЕЙС</text>
+  <text x="84" y="132" class="sans light" font-size="48" font-weight="650">Одна точка входа — обычный диалог</text>
+  <text x="84" y="172" class="sans muted" font-size="23">Без ручных шаблонов, служебных папок и восстановления контекста по памяти.</text>
+
+  <g filter="url(#shadow)">
+    <path d="M80 260Q80 228 112 228H500Q532 228 532 260V488Q532 520 500 520H242L188 574L196 520H112Q80 520 80 488Z" fill="#111F26" stroke="#31434C" stroke-width="2"/>
+    <rect x="112" y="263" width="114" height="32" rx="16" fill="#D8FF5F"/>
+    <text x="169" y="285" class="mono" fill="#0B1117" font-size="15" text-anchor="middle" font-weight="700">ЧЕЛОВЕК</text>
+    <text x="116" y="345" class="sans light" font-size="29" font-weight="620">«Нужно мигрировать Oracle</text>
+    <text x="116" y="384" class="sans light" font-size="29" font-weight="620">на PostgreSQL.</text>
+    <text x="116" y="438" class="sans muted" font-size="21">Начни с рисков и первой</text>
+    <text x="116" y="470" class="sans muted" font-size="21">проверяемой итерации»</text>
+  </g>
+
+  <path d="M548 401H657" fill="none" stroke="#D8FF5F" stroke-width="3" stroke-dasharray="7 8" marker-end="url(#arrow)"/>
+
+  <g transform="translate(790 404)" filter="url(#shadow)">
+    <circle r="134" fill="#0C1419" stroke="#D8FF5F" stroke-width="3"/>
+    <circle r="103" fill="none" stroke="#68D8E8" stroke-opacity="0.28" stroke-width="2" stroke-dasharray="5 9"/>
+    <path d="M0-67L58-34V34L0 67L-58 34V-34Z" fill="#D8FF5F"/>
+    <path d="M0-42L36-21V21L0 42L-36 21V-21Z" fill="#0B1117"/>
+    <circle r="9" fill="#68D8E8"/>
+    <text y="104" class="mono light" font-size="17" text-anchor="middle" letter-spacing="3">ИИ-АГЕНТ</text>
+  </g>
+
+  <path d="M928 401H1037" fill="none" stroke="#D8FF5F" stroke-width="3" stroke-dasharray="7 8" marker-end="url(#arrow)"/>
+
+  <g transform="translate(1064 235)">
+    <text x="0" y="0" class="mono cyan" font-size="16" letter-spacing="2">РАБОЧУЮ СИСТЕМУ ВЕДЁТ АГЕНТ</text>
+    <g transform="translate(0 32)">
+      <path d="M0 0H442L474 32V88H0Z" fill="#13242B" stroke="#2B434C" stroke-width="2"/>
+      <path d="M442 0V32H474" fill="none" stroke="#68D8E8" stroke-width="2"/>
+      <circle cx="34" cy="44" r="12" fill="#D8FF5F"/><path d="M28 44l5 5 9-12" fill="none" stroke="#0B1117" stroke-width="3"/>
+      <text x="62" y="39" class="sans light" font-size="22" font-weight="620">Постановка и источники</text>
+      <text x="62" y="67" class="sans muted" font-size="16">Факты отдельно от предположений</text>
+    </g>
+    <g transform="translate(22 137)">
+      <path d="M0 0H420L452 32V88H0Z" fill="#122128" stroke="#294049" stroke-width="2"/>
+      <path d="M420 0V32H452" fill="none" stroke="#68D8E8" stroke-width="2"/>
+      <circle cx="34" cy="44" r="12" fill="#D8FF5F"/><path d="M28 44l5 5 9-12" fill="none" stroke="#0B1117" stroke-width="3"/>
+      <text x="62" y="39" class="sans light" font-size="22" font-weight="620">Итерации и решения</text>
+      <text x="62" y="67" class="sans muted" font-size="16">Цель, подтверждения, неизвестные</text>
+    </g>
+    <g transform="translate(44 242)">
+      <path d="M0 0H398L430 32V88H0Z" fill="#111E24" stroke="#273D45" stroke-width="2"/>
+      <path d="M398 0V32H430" fill="none" stroke="#68D8E8" stroke-width="2"/>
+      <circle cx="34" cy="44" r="12" fill="#D8FF5F"/><path d="M28 44l5 5 9-12" fill="none" stroke="#0B1117" stroke-width="3"/>
+      <text x="62" y="39" class="sans light" font-size="22" font-weight="620">Проверяемый результат</text>
+      <text x="62" y="67" class="sans muted" font-size="16">Передача и один следующий шаг</text>
+    </g>
+  </g>
+
+  <path d="M80 680H1520" stroke="#31434C"/>
+  <text x="84" y="730" class="sans light" font-size="30" font-weight="650">Человек задаёт намерение.<tspan class="lime" dx="24">Агент ведёт работу.</tspan></text>
+  <text x="84" y="772" class="mono muted" font-size="16" letter-spacing="1.2">МЕНЬШЕ РАБОТЫ С ФАЙЛАМИ  /  БОЛЬШЕ ПРОВЕРЯЕМОЙ РАБОТЫ</text>
+</svg>

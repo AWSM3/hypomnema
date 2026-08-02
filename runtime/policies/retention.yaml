@@ -1,0 +1,11 @@
+{
+  "automatic_delete": false,
+  "physical_archive_requires_confirmation": true,
+  "protected_roles": [
+    "input",
+    "authoritative-output",
+    "decision",
+    "verification-evidence"
+  ],
+  "schema_version": 1
+}

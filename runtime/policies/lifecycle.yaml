@@ -1,0 +1,55 @@
+{
+  "phases": [
+    "intake",
+    "research",
+    "decision",
+    "design",
+    "delivery",
+    "verification",
+    "closure"
+  ],
+  "schema_version": 1,
+  "statuses": [
+    "unclassified",
+    "active",
+    "waiting",
+    "blocked",
+    "done",
+    "cancelled",
+    "archived"
+  ],
+  "transitions": {
+    "active": [
+      "waiting",
+      "blocked",
+      "done",
+      "cancelled"
+    ],
+    "archived": [
+      "active"
+    ],
+    "blocked": [
+      "active",
+      "waiting",
+      "cancelled"
+    ],
+    "cancelled": [
+      "active",
+      "archived"
+    ],
+    "done": [
+      "active",
+      "archived"
+    ],
+    "unclassified": [
+      "active",
+      "cancelled",
+      "archived"
+    ],
+    "waiting": [
+      "active",
+      "blocked",
+      "cancelled"
+    ]
+  }
+}

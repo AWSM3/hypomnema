@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workspace Bootstrap"
+  short_description: "Initialize or adopt an AI-native workspace"
+  default_prompt: "Use $workspace-bootstrap to initialize or safely adopt this workspace."

@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="820" viewBox="0 0 1600 820" role="img" aria-labelledby="title desc">
+  <title id="title">Безопасные обновления AI-native Workspace через Git</title>
+  <desc id="desc">Git pull обновляет только продуктовый слой, а задачи, артефакты, решения и история пользователя остаются под защитой.</desc>
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#091016"/><stop offset="1" stop-color="#111C21"/></linearGradient>
+    <pattern id="grid3" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#7D929D" stroke-opacity="0.075"/></pattern>
+    <linearGradient id="product" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#17313A"/><stop offset="1" stop-color="#10242B"/></linearGradient>
+    <linearGradient id="instance" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#202914"/><stop offset="1" stop-color="#151E17"/></linearGradient>
+    <filter id="shadow3" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="15" stdDeviation="22" flood-color="#000" flood-opacity="0.45"/></filter>
+    <marker id="arrow3" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#68D8E8"/></marker>
+    <style>
+      .sans{font-family:'IBM Plex Sans','Avenir Next','Segoe UI',sans-serif}.mono{font-family:'IBM Plex Mono','Cascadia Mono',monospace}
+      .light{fill:#F3F1E8}.muted{fill:#91A1AA}.lime{fill:#D8FF5F}.cyan{fill:#68D8E8}
+    </style>
+  </defs>
+  <rect width="1600" height="820" fill="url(#bg3)"/><rect width="1600" height="820" fill="url(#grid3)"/>
+  <text x="84" y="74" class="mono lime" font-size="18" letter-spacing="3">03 / БЕЗОПАСНОЕ ОБНОВЛЕНИЕ</text>
+  <text x="84" y="132" class="sans light" font-size="48" font-weight="650">Обновляется продукт. Не перезаписывается работа.</text>
+  <text x="84" y="172" class="sans muted" font-size="23">Git приносит новые механики, а задачи и подтверждения остаются вашим активом.</text>
+
+  <g transform="translate(84 234)" filter="url(#shadow3)">
+    <path d="M0 0H1040L1080 40V174H0Z" fill="url(#product)" stroke="#31515D" stroke-width="2"/>
+    <path d="M1040 0V40H1080" fill="none" stroke="#68D8E8" stroke-width="2"/>
+    <rect x="28" y="26" width="204" height="34" rx="17" fill="#68D8E8"/>
+    <text x="130" y="49" class="mono" fill="#071014" font-size="15" text-anchor="middle" font-weight="700">СЛОЙ ПРОДУКТА</text>
+    <text x="30" y="102" class="sans light" font-size="29" font-weight="650">git pull</text>
+    <text x="150" y="102" class="mono cyan" font-size="17">ТЕКУЩАЯ → НОВАЯ</text>
+    <g transform="translate(30 128)">
+      <rect width="142" height="28" rx="4" fill="#0C181E"/><text x="71" y="19" class="mono light" font-size="13" text-anchor="middle">ДВИЖОК</text>
+      <rect x="154" width="142" height="28" rx="4" fill="#0C181E"/><text x="225" y="19" class="mono light" font-size="13" text-anchor="middle">НАВЫКИ</text>
+      <rect x="308" width="142" height="28" rx="4" fill="#0C181E"/><text x="379" y="19" class="mono light" font-size="13" text-anchor="middle">СХЕМЫ</text>
+      <rect x="462" width="142" height="28" rx="4" fill="#0C181E"/><text x="533" y="19" class="mono light" font-size="13" text-anchor="middle">ПРАВИЛА</text>
+      <rect x="616" width="206" height="28" rx="4" fill="#0C181E"/><text x="719" y="19" class="mono light" font-size="13" text-anchor="middle">КОНТРАКТ АГЕНТА</text>
+    </g>
+  </g>
+
+  <path d="M1178 321H1302" fill="none" stroke="#68D8E8" stroke-width="4" stroke-dasharray="8 8" marker-end="url(#arrow3)"/>
+  <g transform="translate(1348 321)" filter="url(#shadow3)">
+    <circle r="88" fill="#0D181D" stroke="#68D8E8" stroke-width="3"/>
+    <path d="M-28-5A32 32 0 0 1 24-28" fill="none" stroke="#68D8E8" stroke-width="6" stroke-linecap="round"/>
+    <path d="M25-42L28-23L10-27" fill="#68D8E8"/>
+    <path d="M28 5A32 32 0 0 1-24 28" fill="none" stroke="#D8FF5F" stroke-width="6" stroke-linecap="round"/>
+    <path d="M-25 42L-28 23L-10 27" fill="#D8FF5F"/>
+    <text y="74" class="mono light" font-size="13" text-anchor="middle" letter-spacing="1">АГЕНТ ОБНОВЛЯЕТ</text>
+  </g>
+
+  <g transform="translate(84 470)" filter="url(#shadow3)">
+    <path d="M0 0H1432V214H0Z" fill="url(#instance)" stroke="#4D6128" stroke-width="2"/>
+    <path d="M0 0H1432" stroke="#D8FF5F" stroke-width="5"/>
+    <rect x="28" y="26" width="196" height="34" rx="17" fill="#D8FF5F"/>
+    <text x="126" y="49" class="mono" fill="#0B1117" font-size="15" text-anchor="middle" font-weight="700">ВАША РАБОТА</text>
+    <text x="30" y="104" class="sans light" font-size="28" font-weight="650">Ваш накопленный контекст остаётся на месте</text>
+
+    <g transform="translate(30 132)">
+      <g><path d="M0 0H210L230 20V54H0Z" fill="#101810" stroke="#566A30"/><text x="20" y="34" class="mono light" font-size="14">ЗАДАЧИ / ВВОДНЫЕ</text></g>
+      <g transform="translate(246)"><path d="M0 0H210L230 20V54H0Z" fill="#101810" stroke="#566A30"/><text x="20" y="34" class="mono light" font-size="14">АРТЕФАКТЫ</text></g>
+      <g transform="translate(492)"><path d="M0 0H210L230 20V54H0Z" fill="#101810" stroke="#566A30"/><text x="20" y="34" class="mono light" font-size="14">РЕШЕНИЯ</text></g>
+      <g transform="translate(738)"><path d="M0 0H210L230 20V54H0Z" fill="#101810" stroke="#566A30"/><text x="20" y="34" class="mono light" font-size="14">РЕЕСТРЫ</text></g>
+      <g transform="translate(984)"><path d="M0 0H210L230 20V54H0Z" fill="#101810" stroke="#566A30"/><text x="20" y="34" class="mono light" font-size="14">ИСТОРИЯ ПРОВЕРОК</text></g>
+    </g>
+
+    <g transform="translate(1322 84)">
+      <path d="M0-38L42-21V10C42 43 22 61 0 72C-22 61-42 43-42 10V-21Z" fill="#D8FF5F"/>
+      <path d="M-18 12l12 12 25-31" fill="none" stroke="#0B1117" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <g transform="translate(84 746)">
+    <text class="sans light" font-size="27" font-weight="650">Новые практики приходят через Git.<tspan class="lime" dx="24">Ваши подтверждения остаются на месте.</tspan></text>
+  </g>
+  <text x="1516" y="790" class="mono muted" font-size="14" text-anchor="end" letter-spacing="1.2">БЕЗ ПЕРЕЗАПИСИ / ПРОИЗВОДНЫЕ ДАННЫЕ ПЕРЕСОБИРАЮТСЯ</text>
+</svg>

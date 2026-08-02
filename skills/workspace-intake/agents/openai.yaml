@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workspace Intake"
+  short_description: "Register work items and sources with provenance"
+  default_prompt: "Use $workspace-intake to register this request and its sources."

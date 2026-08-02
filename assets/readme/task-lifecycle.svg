@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="820" viewBox="0 0 1600 820" role="img" aria-labelledby="title desc">
+  <title id="title">Управляемый жизненный цикл задачи</title>
+  <desc id="desc">Запрос превращается в сохраняемый контекст, итерации, проверки, результат и передачу, независимую от истории чата.</desc>
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#091016"/><stop offset="1" stop-color="#111C21"/></linearGradient>
+    <pattern id="grid2" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#7D929D" stroke-opacity="0.075"/></pattern>
+    <linearGradient id="track" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#68D8E8"/><stop offset="0.52" stop-color="#D8FF5F"/><stop offset="1" stop-color="#F3F1E8"/></linearGradient>
+    <filter id="shadow2" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000" flood-opacity="0.42"/></filter>
+    <style>
+      .sans{font-family:'IBM Plex Sans','Avenir Next','Segoe UI',sans-serif}.mono{font-family:'IBM Plex Mono','Cascadia Mono',monospace}
+      .light{fill:#F3F1E8}.muted{fill:#91A1AA}.lime{fill:#D8FF5F}.cyan{fill:#68D8E8}
+    </style>
+  </defs>
+  <rect width="1600" height="820" fill="url(#bg2)"/><rect width="1600" height="820" fill="url(#grid2)"/>
+  <text x="84" y="74" class="mono cyan" font-size="18" letter-spacing="3">02 / ПРОВЕРЯЕМЫЙ ПРОЦЕСС</text>
+  <text x="84" y="132" class="sans light" font-size="48" font-weight="650">Работа не исчезает вместе с чатом</text>
+  <text x="84" y="172" class="sans muted" font-size="23">Каждый шаг оставляет состояние, подтверждения и понятный маршрут продолжения.</text>
+
+  <path d="M146 388C320 388 314 310 490 310S664 466 842 466 1016 328 1192 328 1300 388 1454 388" fill="none" stroke="#24353D" stroke-width="20" stroke-linecap="round"/>
+  <path d="M146 388C320 388 314 310 490 310S664 466 842 466 1016 328 1192 328 1300 388 1454 388" fill="none" stroke="url(#track)" stroke-width="5" stroke-linecap="round"/>
+
+  <g filter="url(#shadow2)">
+    <g transform="translate(146 388)"><circle r="39" fill="#0E181D" stroke="#68D8E8" stroke-width="4"/><text y="7" class="mono cyan" font-size="18" text-anchor="middle">01</text></g>
+    <g transform="translate(388 324)"><circle r="39" fill="#0E181D" stroke="#70DFD8" stroke-width="4"/><text y="7" class="mono cyan" font-size="18" text-anchor="middle">02</text></g>
+    <g transform="translate(632 390)"><circle r="47" fill="#0E181D" stroke="#D8FF5F" stroke-width="4"/><text y="7" class="mono lime" font-size="18" text-anchor="middle">03</text></g>
+    <g transform="translate(876 447)"><circle r="39" fill="#0E181D" stroke="#D8FF5F" stroke-width="4"/><text y="7" class="mono lime" font-size="18" text-anchor="middle">04</text></g>
+    <g transform="translate(1120 352)"><circle r="39" fill="#0E181D" stroke="#E7EFBC" stroke-width="4"/><text y="7" class="mono light" font-size="18" text-anchor="middle">05</text></g>
+    <g transform="translate(1454 388)"><circle r="47" fill="#D8FF5F" stroke="#F3F1E8" stroke-width="3"/><path d="M-20 0L-7 13L22-23" fill="none" stroke="#0B1117" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g>
+  </g>
+
+  <g class="sans">
+    <text x="146" y="470" class="light" font-size="21" text-anchor="middle" font-weight="650">Запрос</text><text x="146" y="499" class="muted" font-size="15" text-anchor="middle">обычным языком</text>
+    <text x="388" y="246" class="light" font-size="21" text-anchor="middle" font-weight="650">Контекст</text><text x="388" y="275" class="muted" font-size="15" text-anchor="middle">факты + неизвестные</text>
+    <text x="632" y="490" class="light" font-size="21" text-anchor="middle" font-weight="650">Итерация</text><text x="632" y="519" class="muted" font-size="15" text-anchor="middle">одна цель</text>
+    <text x="876" y="535" class="light" font-size="21" text-anchor="middle" font-weight="650">Проверка</text><text x="876" y="564" class="muted" font-size="15" text-anchor="middle">реальные подтверждения</text>
+    <text x="1120" y="274" class="light" font-size="21" text-anchor="middle" font-weight="650">Результат</text><text x="1120" y="303" class="muted" font-size="15" text-anchor="middle">артефакт + решение</text>
+    <text x="1454" y="470" class="light" font-size="21" text-anchor="middle" font-weight="650">Передача</text><text x="1454" y="499" class="muted" font-size="15" text-anchor="middle">можно продолжить</text>
+  </g>
+
+
+  <g transform="translate(84 640)">
+    <path d="M0 0H430" stroke="#31434C"/><circle cx="0" cy="0" r="5" fill="#68D8E8"/>
+    <text y="42" class="sans light" font-size="23" font-weight="620">Контекст переживает паузу</text>
+    <text y="73" class="sans muted" font-size="17">Агент восстанавливает работу из реестра.</text>
+  </g>
+  <g transform="translate(590 640)">
+    <path d="M0 0H430" stroke="#31434C"/><circle cx="0" cy="0" r="5" fill="#D8FF5F"/>
+    <text y="42" class="sans light" font-size="23" font-weight="620">Проверки не притворяются</text>
+    <text y="73" class="sans muted" font-size="17">Не запускалось — значит не проверено.</text>
+  </g>
+  <g transform="translate(1096 640)">
+    <path d="M0 0H420" stroke="#31434C"/><circle cx="0" cy="0" r="5" fill="#F3F1E8"/>
+    <text y="42" class="sans light" font-size="23" font-weight="620">Следующий шаг всегда один</text>
+    <text y="73" class="sans muted" font-size="17">Меньше потерь на повторный старт.</text>
+  </g>
+</svg>

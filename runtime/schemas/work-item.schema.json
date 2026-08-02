@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "context": {
+      "type": "string"
+    },
+    "entity_type": {
+      "const": "work-item"
+    },
+    "id": {
+      "minLength": 3,
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "unclassified",
+        "project",
+        "task",
+        "research",
+        "migration",
+        "release",
+        "decision",
+        "document-package",
+        "capability",
+        "experiment",
+        "dependency",
+        "reference-corpus"
+      ]
+    },
+    "path": {
+      "type": "string"
+    },
+    "phase": {
+      "enum": [
+        "intake",
+        "research",
+        "decision",
+        "design",
+        "delivery",
+        "verification",
+        "closure"
+      ]
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "status": {
+      "enum": [
+        "unclassified",
+        "active",
+        "waiting",
+        "blocked",
+        "done",
+        "cancelled",
+        "archived"
+      ]
+    },
+    "title": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "entity_type",
+    "title",
+    "kind",
+    "context",
+    "path",
+    "status",
+    "phase",
+    "created_at",
+    "updated_at"
+  ],
+  "type": "object"
+}

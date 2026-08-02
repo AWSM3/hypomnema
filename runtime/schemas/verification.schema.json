@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "entity_type": {
+      "const": "verification"
+    },
+    "id": {
+      "minLength": 3,
+      "type": "string"
+    },
+    "result": {
+      "enum": [
+        "passed",
+        "failed",
+        "warning"
+      ]
+    },
+    "schema_version": {
+      "const": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "entity_type",
+    "subject",
+    "validator",
+    "validator_version",
+    "result",
+    "checked_at"
+  ],
+  "type": "object"
+}
