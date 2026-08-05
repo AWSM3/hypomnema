@@ -5,7 +5,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { DatabaseSync } from "node:sqlite";
 
-const ENGINE_VERSION = "0.3.0";
+const ENGINE_VERSION = "0.4.0";
 const CONTRACT_VERSION = "0.1";
 const SCHEMA_VERSION = 1;
 const ENTITY_DIRS = {
@@ -35,7 +35,7 @@ const DEFAULT_EXCLUDES = [
   ".obsidian", ".tmp",
 ];
 const PRODUCT_CHECKOUT_EXCLUDES = [
-  "runtime", "scripts", "skills", "templates", "examples", "assets", "agents",
+  "runtime", "scripts", "skills", "templates", "examples", "assets", "agents", "docs",
 ];
 const WALK_EXCLUDES = new Set([
   ".git", ".hg", ".svn", "node_modules", ".venv", "venv", "__pycache__",
@@ -76,6 +76,7 @@ function parseArgs(argv) {
       || key === "verification"
       || key === "unresolved"
       || key === "decision"
+      || key === "source"
       || key === "option"
       || key === "consequence"
     ) {
@@ -186,6 +187,24 @@ function sha256Buffer(buffer) {
 
 function sha256File(file) {
   return sha256Buffer(fs.readFileSync(file));
+}
+
+function localEntityFile(root, entityType, data) {
+  const value = entityType === "source"
+    ? data.uri
+    : entityType === "artifact"
+      ? data.path
+      : null;
+  if (!value || (/^[a-z]+:/i.test(value) && !/^[a-z]:[\\/]/i.test(value))) return null;
+  const full = path.isAbsolute(value) ? value : path.join(root, value);
+  if (!fs.existsSync(full) || !fs.statSync(full).isFile()) return null;
+  const stat = fs.statSync(full);
+  return {
+    path: normalizeRel(value),
+    full,
+    sha256: sha256File(full),
+    size_bytes: stat.size,
+  };
 }
 
 function slug(value) {
@@ -331,6 +350,11 @@ function schemaDefinitions() {
         entity_type: { const: "artifact" },
         authority: { enum: AUTHORITIES },
         confirmed_by: { type: ["string", "null"] },
+        work_item: { type: ["string", "null"] },
+        sources: { type: "array", items: { type: "string" } },
+        sha256: { type: ["string", "null"] },
+        size_bytes: { type: ["integer", "null"] },
+        verification_status: { enum: ["not-verified", "passed", "failed", "warning"] },
       },
     },
     "iteration.schema.json": {
@@ -349,6 +373,10 @@ function schemaDefinitions() {
         ...base.properties,
         entity_type: { const: "verification" },
         result: { enum: ["passed", "failed", "warning"] },
+        report: { type: ["string", "null"] },
+        report_sha256: { type: ["string", "null"] },
+        subject_sha256: { type: ["string", "null"] },
+        evidence: { type: "array", items: { type: "string" } },
       },
     },
     "proposal.schema.json": {
@@ -380,7 +408,7 @@ function initWorkspace(root, options) {
     root: ".",
     manifest_format: "yaml-1.2-json-subset",
     engine: {
-      name: "ai-native-workspace-engine",
+      name: "hypomnema-engine",
       version: ENGINE_VERSION,
       entrypoint: ".ai-workspace/engine/workspace.mjs",
       runtime: "node>=22",
@@ -610,6 +638,16 @@ function validateEntity(entry, root, allIds) {
       errors.push(`${rel}: authoritative artifact требует accepted decision или human confirmation`);
     }
   }
+  if (entityType === "source" || entityType === "artifact") {
+    const localFile = localEntityFile(root, entityType, data);
+    if (localFile && data.sha256 && data.sha256 !== localFile.sha256) {
+      errors.push(`${rel}: checksum drift; run refresh --id ${data.id} --write`);
+    }
+    if (localFile && !data.sha256) {
+      warnings.push(`${rel}: local file has no checksum; run refresh --id ${data.id} --write`);
+    }
+  }
+
   if (entityType === "decision") {
     if (data.supersedes && !allIds.has(data.supersedes)) {
       errors.push(`${rel}: supersedes ссылается на неизвестный id ${data.supersedes}`);
@@ -645,6 +683,84 @@ function validateEntity(entry, root, allIds) {
     && (!Array.isArray(data.unknowns) || data.unknowns.some((item) => typeof item !== "string"))
   ) {
     errors.push(`${rel}: unknowns должен быть массивом строк`);
+  }
+  return { errors, warnings };
+}
+
+function validateEvidenceChains(entities, root) {
+  const errors = [];
+  const warnings = [];
+  const byId = new Map(entities.filter((entry) => entry.data.id).map((entry) => [entry.data.id, entry]));
+  const relations = entities.filter((entry) => entry.entityType === "relation").map((entry) => entry.data);
+  const verifications = entities.filter((entry) => entry.entityType === "verification").map((entry) => entry.data);
+  let legacyPassedChecks = 0;
+  let legacyPassedWithoutEvidence = 0;
+
+  for (const artifact of entities.filter((entry) => entry.entityType === "artifact")) {
+    const data = artifact.data;
+    if (data.sources !== undefined && !Array.isArray(data.sources)) {
+      errors.push(`${artifact.rel}: sources must be an array`);
+    } else {
+      for (const sourceId of data.sources ?? []) {
+        const source = byId.get(sourceId);
+        if (!source || source.entityType !== "source") {
+          errors.push(`${artifact.rel}: unknown source ${sourceId}`);
+        }
+      }
+    }
+
+    if (data.work_item) {
+      const workItem = byId.get(data.work_item);
+      if (!workItem || workItem.entityType !== "work-item") {
+        errors.push(`${artifact.rel}: unknown work_item ${data.work_item}`);
+      }
+    }
+    const producedByRelation = relations.some((relation) =>
+      relation.relation_type === "produces"
+      && relation.status === "accepted"
+      && relation.to === data.id
+      && byId.get(relation.from)?.entityType === "work-item");
+    if (data.role === "primary-output" && !data.work_item && !producedByRelation) {
+      errors.push(`${artifact.rel}: primary-output requires work_item or accepted produces relation`);
+    }
+
+    if (data.verification_status === "passed") {
+      const passed = verifications.filter((verification) =>
+        verification.subject === data.id && verification.result === "passed");
+      if (!passed.length) {
+        errors.push(`${artifact.rel}: passed status has no passed verification record`);
+      } else {
+        const checksumBound = passed.filter((verification) => verification.subject_sha256);
+        if (!checksumBound.length) {
+          legacyPassedChecks += 1;
+        } else if (data.sha256 && !checksumBound.some((verification) => verification.subject_sha256 === data.sha256)) {
+          errors.push(`${artifact.rel}: no passed verification matches the current artifact checksum`);
+        }
+      }
+    }
+  }
+
+  for (const verification of verifications) {
+    if (verification.result === "passed" && !verification.report && !(verification.evidence?.length)) {
+      legacyPassedWithoutEvidence += 1;
+    }
+    if (verification.report && verification.report_sha256) {
+      const reportPath = path.isAbsolute(verification.report)
+        ? verification.report
+        : path.join(root, verification.report);
+      if (!fs.existsSync(reportPath) || !fs.statSync(reportPath).isFile()) {
+        errors.push(`Verification ${verification.id}: report file is missing`);
+      } else if (sha256File(reportPath) !== verification.report_sha256) {
+        errors.push(`Verification ${verification.id}: report checksum drift`);
+      }
+    }
+  }
+
+  if (legacyPassedChecks) {
+    warnings.push(`${legacyPassedChecks} passed artifact verification(s) predate checksum binding`);
+  }
+  if (legacyPassedWithoutEvidence) {
+    warnings.push(`${legacyPassedWithoutEvidence} passed verification record(s) predate the evidence requirement`);
   }
   return { errors, warnings };
 }
@@ -779,6 +895,10 @@ function validateWorkspace(root, options = {}) {
     errors.push(...result.errors);
     warnings.push(...result.warnings);
   }
+  const evidenceValidation = validateEvidenceChains(entities, root);
+  errors.push(...evidenceValidation.errors);
+  warnings.push(...evidenceValidation.warnings);
+
   const hash = canonicalHash(entities);
   if (options.checkGenerated) {
     const indexFile = path.join(control(root), "generated", "WORKSPACE_INDEX.md");
@@ -1086,6 +1206,22 @@ function registerArtifact(root, options) {
     if (!options[required]) throw new Error(`register-artifact требует --${required}`);
   }
   if (!AUTHORITIES.includes(options.authority)) throw new Error(`Недопустимый authority: ${options.authority}`);
+  if (options.role === "primary-output" && !options["work-item"]) {
+    throw new Error("Primary output requires --work-item");
+  }
+  if (options["work-item"]) {
+    const workItem = findEntity(root, options["work-item"]);
+    if (workItem.entityType !== "work-item") {
+      throw new Error("--work-item must reference a work-item");
+    }
+  }
+  const sources = options.source ?? [];
+  for (const sourceId of sources) {
+    const source = findEntity(root, sourceId);
+    if (source.entityType !== "source") {
+      throw new Error("Artifact source must reference a source");
+    }
+  }
   const decisionRef = singleOption(options.decision, "decision");
   if (options.authority === "authoritative") {
     if (!(options.evidence?.length)) {
@@ -1114,7 +1250,7 @@ function registerArtifact(root, options) {
     path: rel,
     role: options.role,
     work_item: options["work-item"] ?? null,
-    sources: options.source ? [options.source] : [],
+    sources,
     generator: options.generator ?? null,
     sha256: stat.isFile() ? sha256File(full) : null,
     size_bytes: stat.isFile() ? stat.size : null,
@@ -1169,11 +1305,33 @@ function recordVerification(root, options) {
   if (!["passed", "failed", "warning"].includes(options.result)) {
     throw new Error(`Недопустимый result: ${options.result}`);
   }
+  const evidence = options.evidence ?? [];
+  if (options.result === "passed" && !options.report && !evidence.length) {
+    throw new Error("Passed verification requires --report or --evidence");
+  }
+
   const subjectEntry = options.subject !== "workspace" ? findEntity(root, options.subject) : null;
+  const subjectFile = subjectEntry
+    ? localEntityFile(root, subjectEntry.entityType, subjectEntry.data)
+    : null;
+  if (subjectFile && !subjectEntry.data.sha256) {
+    throw new Error(`Subject has no checksum; run refresh --id ${options.subject} --write`);
+  }
+  if (subjectFile && subjectEntry.data.sha256 !== subjectFile.sha256) {
+    throw new Error(`Subject changed after registration; run refresh --id ${options.subject} --write`);
+  }
+
   const reportPath = options.report ? normalizeRel(options.report) : null;
-  if (reportPath && !fs.existsSync(path.join(root, reportPath))) {
+  const reportFull = reportPath
+    ? (path.isAbsolute(reportPath) ? reportPath : path.join(root, reportPath))
+    : null;
+  if (reportFull && !fs.existsSync(reportFull)) {
     throw new Error(`Verification report не найден: ${reportPath}`);
   }
+  if (reportFull && !fs.statSync(reportFull).isFile()) {
+    throw new Error("Verification report must be a file");
+  }
+
   const id = options.id ?? `verify-${slug(options.subject)}-${slug(options.validator)}-${today()}`;
   const manifest = {
     schema_version: SCHEMA_VERSION,
@@ -1186,7 +1344,9 @@ function recordVerification(root, options) {
     checked_at: nowIso(),
     result: options.result,
     report: reportPath,
-    evidence: options.evidence ?? [],
+    report_sha256: reportFull ? sha256File(reportFull) : null,
+    subject_sha256: subjectFile?.sha256 ?? null,
+    evidence,
   };
   const file = manifestPath(root, "verification", id);
   if (fs.existsSync(file)) throw new Error(`Verification уже существует: ${id}`);
@@ -1207,7 +1367,13 @@ function recordVerification(root, options) {
     }
     appendAudit(root, "record-verification", changes);
   }
-  return report("record-verification", { dry_run: !options.write, id, result: options.result, errors: [] }, options);
+  return report("record-verification", {
+    dry_run: !options.write,
+    id,
+    result: options.result,
+    subject_sha256: manifest.subject_sha256,
+    errors: [],
+  }, options);
 }
 
 function refreshFacts(root, options) {
@@ -1557,7 +1723,18 @@ function checkMarkdownLinks(root, markdownFiles) {
   const pattern = /!?\[[^\]]*]\(([^)]+)\)/g;
   for (const file of markdownFiles) {
     const text = fs.readFileSync(file, "utf8");
-    for (const match of text.matchAll(pattern)) {
+    let fenceMarker = null;
+    const visibleText = text.split(/\r?\n/).filter((line) => {
+      const fence = /^\s*(```+|~~~+)/.exec(line);
+      if (fence) {
+        const marker = fence[1][0];
+        if (fenceMarker === null) fenceMarker = marker;
+        else if (fenceMarker === marker) fenceMarker = null;
+        return false;
+      }
+      return fenceMarker === null;
+    }).join("\n");
+    for (const match of visibleText.matchAll(pattern)) {
       let target = match[1].trim().replace(/^<|>$/g, "");
       if (!target || target.startsWith("#") || /^[a-z]+:/i.test(target)) continue;
       target = target.split("#")[0];
@@ -1669,6 +1846,7 @@ function orient(root, options = {}) {
   const sources = entities.filter((entry) => entry.entityType === "source").map((entry) => entry.data);
   const decisions = entities.filter((entry) => entry.entityType === "decision").map((entry) => entry.data);
   const relations = entities.filter((entry) => entry.entityType === "relation").map((entry) => entry.data);
+  const verifications = entities.filter((entry) => entry.entityType === "verification").map((entry) => entry.data);
   const adjacency = new Map();
   for (const relation of relations) {
     if (!adjacency.has(relation.from)) adjacency.set(relation.from, new Set());
@@ -1737,6 +1915,17 @@ function orient(root, options = {}) {
         .sort((a, b) => String(b.decided_at ?? "").localeCompare(String(a.decided_at ?? "")));
       const candidateProposals = proposals.filter((proposal) =>
         proposal.status === "candidate" && proposal.target_id === item.id);
+      const producedArtifactIds = new Set(relations
+        .filter((relation) =>
+          relation.relation_type === "produces"
+          && relation.status === "accepted"
+          && relation.from === item.id)
+        .map((relation) => relation.to));
+      const itemArtifacts = artifacts.filter((artifact) =>
+        artifact.work_item === item.id || producedArtifactIds.has(artifact.id));
+      const artifactIds = new Set(itemArtifacts.map((artifact) => artifact.id));
+      const itemVerifications = verifications.filter((verification) =>
+        artifactIds.has(verification.subject) || verification.subject === item.id);
       const latestCompleted = completedIterations[0] ?? null;
       return {
         id: item.id,
@@ -1752,14 +1941,18 @@ function orient(root, options = {}) {
         active_iteration: iterations.find((iteration) => iteration.id === item.current_iteration) ?? null,
         latest_completed_iteration: latestCompleted,
         latest_official_decision: officialDecisions[0] ?? null,
+        accepted_decisions: officialDecisions,
+        current_goal: (iterations.find((iteration) => iteration.id === item.current_iteration) ?? latestCompleted)?.goal ?? null,
         unresolved: [
           ...(latestCompleted?.unresolved ?? []),
           ...candidateProposals.flatMap((proposal) => proposal.unknowns ?? []),
         ],
         related_sources: relatedSources,
         freshness_warnings: relatedSources.map((source) => source.warning).filter(Boolean),
-        authoritative_artifacts: artifacts.filter((artifact) =>
-          artifact.authority === "authoritative" && artifact.work_item === item.id),
+        artifacts: itemArtifacts,
+        authoritative_artifacts: itemArtifacts.filter((artifact) =>
+          artifact.authority === "authoritative"),
+        verification_records: itemVerifications,
         candidate_proposals: candidateProposals,
       };
     }),
@@ -1798,6 +1991,7 @@ function handoff(root, options = {}) {
   const orientation = orient(root, { id: options.id });
   if (!orientation.work_items.length) throw new Error(`Work item не найден: ${options.id}`);
   const item = orientation.work_items[0];
+  const iteration = item.active_iteration ?? item.latest_completed_iteration;
   const lines = [
     `# Handoff: ${item.title}`,
     "",
@@ -1806,27 +2000,61 @@ function handoff(root, options = {}) {
     `- Status: \`${item.status}\``,
     `- Phase: \`${item.phase}\``,
     `- Kind: \`${item.kind}\``,
-    `- Classification status: \`${item.classification_status ?? "not-set"}\``,
     `- Current iteration: \`${item.current_iteration ?? "none"}\``,
     "",
-    "## Следующее действие",
+    "## Goal",
     "",
-    item.next_action ?? "_Не зафиксировано._",
+    item.current_goal ?? "_Not recorded._",
     "",
-    "## Authoritative artifacts",
+    "## Latest iteration",
     "",
-    ...(item.authoritative_artifacts.length
-      ? item.authoritative_artifacts.map((artifact) => `- \`${artifact.id}\`: ${artifact.path}`)
-      : ["_Не назначены._"]),
+    ...(iteration
+      ? [
+        `- ID: \`${iteration.id}\``,
+        `- Name: ${iteration.name}`,
+        `- Status: \`${iteration.status}\``,
+        `- Goal: ${iteration.goal}`,
+        `- Summary: ${iteration.summary ?? "_Not closed yet._"}`,
+      ]
+      : ["_No iteration recorded._"]),
     "",
-    "## Кандидатные предложения",
+    "## Accepted decisions",
     "",
-    ...(item.candidate_proposals.length
-      ? item.candidate_proposals.map((proposal) =>
-        `- \`${proposal.id}\` (${proposal.confidence ?? "medium"}): ${Object.entries(proposal.changes).map(([key, value]) => `${key}=${value}`).join("; ")}`)
-      : ["_Нет._"]),
+    ...(item.accepted_decisions.length
+      ? item.accepted_decisions.map((decision) => `- \`${decision.id}\`: ${decision.decision}`)
+      : ["_None._"]),
     "",
-    "## Проверка перед продолжением",
+    "## Outputs",
+    "",
+    ...(item.artifacts.length
+      ? item.artifacts.map((artifact) =>
+        `- \`${artifact.id}\`: \`${artifact.path}\`; authority=\`${artifact.authority}\`; verification=\`${artifact.verification_status ?? "not-verified"}\``)
+      : ["_None._"]),
+    "",
+    "## Verification evidence",
+    "",
+    ...(item.verification_records.length
+      ? item.verification_records.map((verification) => {
+        const refs = [verification.report, ...(verification.evidence ?? [])].filter(Boolean).join(", ");
+        return `- \`${verification.id}\`: ${verification.validator}@${verification.validator_version}; result=\`${verification.result}\`; checked=${verification.checked_at}; subject_sha256=\`${verification.subject_sha256 ?? "legacy-unbound"}\`; evidence=${refs || "none"}`;
+      })
+      : ["_None._"]),
+    "",
+    "## Unresolved",
+    "",
+    ...(item.unresolved.length ? item.unresolved.map((value) => `- ${value}`) : ["_None._"]),
+    "",
+    "## Freshness warnings",
+    "",
+    ...(item.freshness_warnings.length
+      ? item.freshness_warnings.map((value) => `- ${value}`)
+      : ["_None._"]),
+    "",
+    "## Next action",
+    "",
+    item.next_action ?? "_Not recorded._",
+    "",
+    "## Resume checks",
     "",
     "```text",
     "node .ai-workspace/engine/workspace.mjs orient --id " + item.id,
@@ -1844,7 +2072,7 @@ function handoff(root, options = {}) {
 
 function usage() {
   return `
-AI-native Workspace Engine ${ENGINE_VERSION}
+Hypomnema Engine ${ENGINE_VERSION}
 
 Usage:
   node .ai-workspace/engine/workspace.mjs <command> [options]
@@ -1856,9 +2084,9 @@ Commands:
   register-source --kind KIND --uri URI [--id ID] [--authority STATE] [--write]
   register-work-item --path PATH --title TITLE --kind KIND --context CONTEXT [--write]
   register-decision --id ID --title TITLE --status STATUS --decision TEXT [--option TEXT] [--consequence TEXT] [--evidence REF] [--write]
-  register-artifact --id ID --title TITLE --kind KIND --path PATH --role ROLE --authority STATE [--write]
+  register-artifact --id ID --title TITLE --kind KIND --path PATH --role ROLE --authority STATE [--work-item ID] [--source ID]... [--write]
   register-relation --from ID --to ID --type TYPE [--write]
-  record-verification --subject ID|workspace --validator NAME --result RESULT [--write]
+  record-verification --subject ID|workspace --validator NAME --result RESULT [--report PATH] [--evidence REF]... [--write]
   refresh --id SOURCE_OR_ARTIFACT_ID [--write]
   accept-classification --id WORK_ITEM_ID [--method METHOD] [--evidence REF] [--write]
   rebuild [--json]

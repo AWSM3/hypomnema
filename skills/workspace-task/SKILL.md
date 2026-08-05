@@ -1,6 +1,6 @@
 ---
 name: workspace-task
-description: Orchestrate substantive engineering, operations, testing, analysis, architecture, research, migration, and delivery work through an AI-native workspace while the agent remains the only user interface. Use whenever a user starts, continues, changes, verifies, pauses, resumes, or closes a task in a managed workspace, even when the user does not name this skill or provide prepared files.
+description: Orchestrate substantive engineering, operations, testing, analysis, architecture, research, migration, and delivery work through a Hypomnema workspace while the agent remains the only user interface. Use whenever a user starts, continues, changes, verifies, pauses, resumes, or closes a task in a managed workspace, even when the user does not name this skill or provide prepared files.
 ---
 
 # Workspace Task

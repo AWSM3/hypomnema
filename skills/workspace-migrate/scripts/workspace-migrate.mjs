@@ -729,7 +729,7 @@ function main() {
   if (!options.root) throw new Error("--root is required");
   const root = path.resolve(options.root);
   if (!fs.existsSync(path.join(root, ".ai-workspace", "workspace.yaml"))) {
-    throw new Error(`Not an AI-native workspace: ${root}`);
+    throw new Error(`Not a Hypomnema workspace: ${root}`);
   }
   if (command === "plan") {
     if (!options.mapping) throw new Error("--mapping is required");

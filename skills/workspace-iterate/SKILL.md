@@ -1,6 +1,6 @@
 ---
 name: workspace-iterate
-description: Start, continue, and close a semantic iteration in an AI-native workspace. Use when Codex performs research, analysis, design, implementation, artifact production, or decision work that must preserve its goal, inputs, outputs, rejected alternatives, verification, unresolved items, and next action.
+description: Start, continue, and close a semantic iteration in a Hypomnema workspace. Use when Codex performs research, analysis, design, implementation, artifact production, or decision work that must preserve its goal, inputs, outputs, rejected alternatives, verification, unresolved items, and next action.
 ---
 
 # Workspace Iterate

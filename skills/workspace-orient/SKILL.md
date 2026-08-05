@@ -1,6 +1,6 @@
 ---
 name: workspace-orient
-description: Restore operational context from an AI-native workspace registry. Use when Codex or a human returns after a pause, does not remember iteration order, needs the current work item, authoritative artifact, latest iteration, unresolved conflicts, freshness warnings, or a defensible next action.
+description: Restore operational context from a Hypomnema workspace registry. Use when Codex or a human returns after a pause, does not remember iteration order, needs the current work item, authoritative artifact, latest iteration, unresolved conflicts, freshness warnings, or a defensible next action.
 ---
 
 # Workspace Orient

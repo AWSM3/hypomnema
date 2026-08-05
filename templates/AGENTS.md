@@ -1,4 +1,4 @@
-# AI-native Workspace entrypoint
+# Hypomnema entrypoint
 
 AI-агент является единственным пользовательским интерфейсом этого workspace.
 

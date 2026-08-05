@@ -16,6 +16,30 @@
         "warning"
       ]
     },
+    "report": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "report_sha256": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "subject_sha256": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "schema_version": {
       "const": 1
     }

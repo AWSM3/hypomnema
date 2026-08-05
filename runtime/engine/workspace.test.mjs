@@ -29,7 +29,7 @@ function runRaw(root, ...args) {
 }
 
 function fixture() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "aiws-fixture-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "hypomnema-fixture-"));
   fs.mkdirSync(path.join(root, "alpha"), { recursive: true });
   fs.mkdirSync(path.join(root, "beta"), { recursive: true });
   fs.writeFileSync(path.join(root, "alpha", "README.md"), "# Alpha\n", "utf8");
@@ -246,6 +246,8 @@ test("artifact verification updates its canonical verification status", () => {
       "fixture-validator",
       "--result",
       "passed",
+      "--evidence",
+      "fixture-test",
       "--write",
     );
     let artifact = JSON.parse(fs.readFileSync(
@@ -253,6 +255,12 @@ test("artifact verification updates its canonical verification status", () => {
       "utf8",
     ));
     assert.equal(artifact.verification_status, "passed");
+    const verification = JSON.parse(fs.readFileSync(
+      path.join(root, ".ai-workspace", "manifests", "verifications", "verify-alpha.yaml"),
+      "utf8",
+    ));
+    assert.equal(verification.subject_sha256, artifact.sha256);
+    assert.deepEqual(verification.evidence, ["fixture-test"]);
     fs.appendFileSync(path.join(root, "alpha", "README.md"), "changed\n", "utf8");
     run(root, "refresh", "--id", "artifact-alpha", "--write");
     artifact = JSON.parse(fs.readFileSync(
@@ -654,6 +662,7 @@ test("product checkout folders are excluded from work-item discovery", () => {
       "examples",
       "assets/readme",
       "agents",
+      "docs",
     ]) {
       fs.mkdirSync(path.join(root, dir), { recursive: true });
     }
@@ -668,7 +677,7 @@ test("product checkout folders are excluded from work-item discovery", () => {
       "utf8",
     ));
     assert.deepEqual(report.items.map((item) => item.path), ["alpha", "beta"]);
-    for (const dir of ["runtime", "scripts", "skills", "templates", "examples", "assets", "agents"]) {
+    for (const dir of ["runtime", "scripts", "skills", "templates", "examples", "assets", "agents", "docs"]) {
       assert.equal(report.excluded.includes(dir), true);
     }
   } finally {

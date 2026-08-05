@@ -1,6 +1,6 @@
 ---
 name: workspace-close
-description: Safely close or pause an AI-native workspace work item. Use when Codex must identify official outputs, complete verification, preserve unresolved items, generate a handoff independent of chat history, set a defensible next action, or prepare an archive plan without deleting or moving files.
+description: Close or pause a Hypomnema work item after recording outputs, verification, unresolved items, and one next action. Use when Codex must generate a handoff independent of chat history or prepare a non-mutating archive plan.
 ---
 
 # Workspace Close

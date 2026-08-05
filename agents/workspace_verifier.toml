@@ -1,5 +1,5 @@
 name = "workspace_verifier"
-description = "Independent read-only verifier of AI-native Workspace and product claims; reports failures but never fixes or records them."
+description = "Read-only reviewer of Hypomnema and product claims; returns candidate findings and never writes canonical state."
 model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"

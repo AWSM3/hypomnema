@@ -1,6 +1,6 @@
 ---
 name: workspace-audit
-description: Perform a non-destructive brownfield audit of an accumulated AI-native workspace. Use when Codex must find unregistered top-level items, orphan or missing paths, nested Git boundaries, invalid Git markers, caches, large directories, broken Markdown links, registry drift, or prepare a remediation plan without cleanup or physical reorganization.
+description: Perform a non-destructive brownfield audit of an accumulated Hypomnema workspace. Use when Codex must find unregistered top-level items, orphan or missing paths, nested Git boundaries, invalid Git markers, caches, large directories, broken Markdown links, registry drift, or prepare a remediation plan without cleanup or physical reorganization.
 ---
 
 # Workspace Audit

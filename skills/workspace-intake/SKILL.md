@@ -1,6 +1,6 @@
 ---
 name: workspace-intake
-description: Register new work, local or external sources, provenance, initial scope, and unknowns in an AI-native workspace. Use when a new request, project, task, research topic, document, repository, URL, or dependency enters the workspace and must receive stable identity before substantive work begins.
+description: Register new work, local or external sources, provenance, initial scope, and unknowns in a Hypomnema workspace. Use when a new request, project, task, research topic, document, repository, URL, or dependency enters the workspace and must receive stable identity before substantive work begins.
 ---
 
 # Workspace Intake

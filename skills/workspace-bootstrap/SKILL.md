@@ -1,6 +1,6 @@
 ---
 name: workspace-bootstrap
-description: Initialize a greenfield AI-native workspace or safely adopt an existing brownfield workspace. Use when Codex must create the workspace contract, scan an accumulated directory, initialize canonical manifests and derived indexes, or begin migration without moving existing content.
+description: Initialize a greenfield Hypomnema workspace or adopt an existing brownfield workspace without moving current content. Use when Codex must create the workspace contract, scan an accumulated directory, initialize canonical manifests and derived indexes, or begin a non-mutating migration assessment.
 ---
 
 # Workspace Bootstrap

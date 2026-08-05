@@ -1,6 +1,6 @@
 ---
 name: workspace-migrate
-description: Plan and safely apply an approved physical path migration in an AI-native workspace. Use when Codex must reorganize existing work-item directories, preserve stable IDs and nested Git boundaries, detect collisions and path references, produce an approval-bound migration plan, apply exact moves, validate links, or provide rollback evidence.
+description: Plan and apply a plan-hash-approved physical path migration in a Hypomnema workspace. Use when Codex must preserve stable IDs and nested Git boundaries, detect collisions and path references, apply exact moves, validate links, or provide rollback evidence.
 ---
 
 # Workspace Migrate

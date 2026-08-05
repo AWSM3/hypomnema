@@ -1,24 +1,24 @@
 {
-  "name": "ai-native-workspace",
-  "version": "0.3.0",
-  "description": "Agent-first local workspace for traceable engineering and analytical work.",
+  "name": "hypomnema",
+  "version": "0.4.0",
+  "description": "Local lifecycle state for resumable, traceable AI-assisted work.",
   "author": {
-    "name": "AI-native Workspace Project"
+    "name": "Hypomnema Project"
   },
   "license": "Apache-2.0",
   "keywords": [
     "codex",
     "workspace",
-    "agent-first",
-    "determinism",
+    "resumable",
+    "traceability",
     "lifecycle"
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "AI-native Workspace",
-    "shortDescription": "Run traceable work through an AI agent",
-    "longDescription": "Start, continue, verify and hand off engineering or analytical work while the agent maintains the local workspace lifecycle.",
-    "developerName": "AI-native Workspace Project",
+    "displayName": "Hypomnema",
+    "shortDescription": "Resume and review long-running AI work",
+    "longDescription": "Maintain task goals, sources, decisions, artifacts, verification records, unresolved items, and next actions outside any single chat.",
+    "developerName": "Hypomnema Project",
     "category": "Productivity",
     "capabilities": [
       "Read",

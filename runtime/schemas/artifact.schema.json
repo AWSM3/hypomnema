@@ -22,6 +22,33 @@
         "null"
       ]
     },
+    "work_item": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sha256": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "size_bytes": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "verification_status": {
+      "enum": ["not-verified", "passed", "failed", "warning"]
+    },
     "id": {
       "minLength": 3,
       "type": "string"

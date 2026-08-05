@@ -39,7 +39,7 @@ function runEngine(target, ...args) {
 }
 
 test("install and update preserve instance-owned work while refreshing product files", () => {
-  const target = fs.mkdtempSync(path.join(os.tmpdir(), "aiws-installer-"));
+  const target = fs.mkdtempSync(path.join(os.tmpdir(), "hypomnema-installer-"));
   try {
     const installed = runInstaller(
       target,
@@ -49,7 +49,12 @@ test("install and update preserve instance-owned work while refreshing product f
       "--write",
     );
     assert.equal(installed.ok, true);
-    assert.equal(installed.product_version, "0.3.0");
+    assert.equal(installed.product_version, "0.4.0");
+    const installedWorkspace = JSON.parse(fs.readFileSync(
+      path.join(target, ".ai-workspace", "workspace.yaml"),
+      "utf8",
+    ));
+    assert.equal(installedWorkspace.engine.name, "hypomnema-engine");
     assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "AGENT_CONTRACT.md")), true);
     assert.equal(fs.existsSync(path.join(target, ".agents", "skills", "workspace-task", "SKILL.md")), true);
     const explorerSource = path.join(bundleRoot, "agents", "workspace_explorer.toml");
@@ -111,6 +116,8 @@ test("install and update preserve instance-owned work while refreshing product f
     fs.writeFileSync(staleAgent, staleAgentContent);
     const productStateFile = path.join(target, ".ai-workspace", "product.json");
     const previousProductState = JSON.parse(fs.readFileSync(productStateFile, "utf8"));
+    previousProductState.product_name = "ai-native-workspace";
+    previousProductState.product_version = "0.3.0";
     previousProductState.managed_files.push({
       component: "subagent",
       path: ".codex/agents/workspace_retired_reader.toml",
@@ -154,7 +161,8 @@ test("install and update preserve instance-owned work while refreshing product f
       path.join(target, ".ai-workspace", "product.json"),
       "utf8",
     ));
-    assert.equal(productState.product_version, "0.3.0");
+    assert.equal(productState.product_name, "hypomnema");
+    assert.equal(productState.product_version, "0.4.0");
     assert.equal(
       productState.managed_files.some((entry) => entry.path === ".agents/skills/workspace-task/SKILL.md"),
       true,

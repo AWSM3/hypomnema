@@ -1,6 +1,6 @@
 ---
 name: workspace-verify
-description: Deterministically validate an AI-native workspace contract, manifests, stable identities, local paths, relations, authority evidence, generated index drift, SQLite projection, lineage, links, and project-specific outputs. Use when Codex is preparing completion, handoff, migration, packaging, or any claim that workspace state is correct.
+description: Deterministically validate a Hypomnema workspace contract, manifests, stable identities, local paths, relations, authority evidence, generated index drift, SQLite projection, lineage, links, and project-specific outputs. Use when Codex is preparing completion, handoff, migration, packaging, or any claim that workspace state is correct.
 ---
 
 # Workspace Verify

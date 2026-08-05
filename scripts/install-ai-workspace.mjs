@@ -235,7 +235,7 @@ for (const entry of previousProduct?.managed_files ?? []) {
 
 const productState = {
   schema_version: 1,
-  product_name: "ai-native-workspace",
+  product_name: "hypomnema",
   product_version: productVersion,
   managed_files: managedFiles
     .map((entry) => ({
@@ -278,9 +278,9 @@ if (!exists) {
     contract_version: "0.1",
     engine: {
       entrypoint: ".ai-workspace/engine/workspace.mjs",
-      name: "ai-native-workspace-engine",
+      name: "hypomnema-engine",
       runtime: "node>=22",
-      version: "0.3.0"
+      version: productVersion
     },
     id,
     manifest_format: "yaml-1.2-json-subset",

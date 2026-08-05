@@ -1,5 +1,5 @@
 name = "workspace_explorer"
-description = "Read-only AI-native Workspace explorer for source, code, manifest, and brownfield evidence gathering before the parent agent changes anything."
+description = "Read-only Hypomnema explorer for source, code, manifest, and brownfield evidence gathering before the parent agent changes anything."
 model = "gpt-5.6-terra"
 model_reasoning_effort = "medium"
 sandbox_mode = "read-only"

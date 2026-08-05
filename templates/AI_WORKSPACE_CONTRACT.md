@@ -1,4 +1,4 @@
-# AI-native workspace contract
+# Hypomnema workspace contract
 
 Этот workspace управляется через `.ai-workspace/`. AI-агент является его
 единственным операционным интерфейсом.
