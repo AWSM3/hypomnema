@@ -46,9 +46,9 @@ test("RU and EN tell the same fit, anti-fit, evidence and documentation story", 
   assert.match(en, /^# Hypomnema$/m);
 
   for (const value of [
-    "## Что сохраняет Hypomnema",
-    "## Для каких задач он рассчитан",
-    "## Когда он, скорее всего, лишний",
+    "## Что остаётся в проекте",
+    "## Когда Hypomnema полезна",
+    "## Когда Hypomnema не нужна",
     "## Документация",
   ]) assert.equal(ru.includes(value), true, `Missing RU section: ${value}`);
   for (const value of [
@@ -71,10 +71,38 @@ test("RU and EN tell the same fit, anti-fit, evidence and documentation story", 
 
   assert.match(ru, /конкретной версии результата/);
   assert.match(en, /specific result version/);
-  for (const readme of [ru, en]) {
-    assert.match(readme, /Handoff|handoff/);
-    assert.match(readme, /more process than value|больше процесса, чем пользы/);
-  }
+  assert.match(ru, /передач[аиу]/);
+  assert.match(en, /handoff/i);
+  assert.match(ru, /больше процесса, чем\s+пользы/);
+  assert.match(en, /more process than value/);
+});
+
+test("Russian README avoids internal English workflow jargon", () => {
+  const ru = read("README.md");
+  for (const jargon of [
+    "AI-native workspace",
+    "AI-агент",
+    "iteration",
+    "unresolved items",
+    "freshness warnings",
+    "canonical workspace-state",
+    "handoff",
+    "summary",
+    "outputs",
+    "authority/status",
+    "verification evidence",
+    "brief",
+    "manifests",
+    "lifecycle-state",
+    "brownfield",
+    "production change",
+    "approval boundary",
+    "issue tracker",
+    "continuity",
+    "product-managed",
+    "audit trail",
+    "custom agents",
+  ]) assert.equal(ru.toLowerCase().includes(jargon.toLowerCase()), false, `English jargon returned: ${jargon}`);
 });
 
 test("plugin metadata uses the Hypomnema identity and the same resume vocabulary", () => {
