@@ -19,9 +19,9 @@ an unapproved change is expensive.
 - **Resume without chat history.** The agent restores the current goal, latest
   iteration, accepted decisions, unresolved items, freshness warnings, and one
   next action from canonical workspace state.
-- **Verification bound to a result version.** A passed verification requires a
-  report or evidence and stores the checked file checksum. If the file changes,
-  `validate` blocks completion until `refresh` and a new verification.
+- **Verification belongs to a specific result version.** Hypomnema records
+  exactly which result was checked. If it changes, the previous verification
+  becomes stale until the new version is checked.
 - **Handoff without repeated archaeology.** The generated handoff contains the
   goal and summary, decisions, outputs with authority/status, verification
   evidence, freshness warnings, unresolved items, and the next action.

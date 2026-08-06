@@ -12,6 +12,13 @@ function read(relativePath) {
 
 test("public copy does not promote commodity or implementation details", () => {
   const publicCopy = [read("README.md"), read("README.en.md")].join("\n");
+  const publicIntegrityCopy = [
+    publicCopy,
+    read("START_HERE.md"),
+    read("docs/POSITIONING.md"),
+    read("assets/readme/evidence-chain.svg"),
+    read("assets/readme/evidence-chain.ru.svg"),
+  ].join("\n");
   const forbidden = [
     "среда, готовая к хранению и обновлению через Git",
     "Git-ready environment",
@@ -29,6 +36,7 @@ test("public copy does not promote commodity or implementation details", () => {
   assert.doesNotMatch(publicCopy, /\bGit-ready\b/i);
   assert.doesNotMatch(publicCopy, /\bsafe(?:ly)?\b/i);
   assert.doesNotMatch(publicCopy, /безопасн/iu);
+  assert.doesNotMatch(publicIntegrityCopy, /sha-?256|checksum|контрольн\S*\s+сумм/iu);
 });
 
 test("RU and EN tell the same fit, anti-fit, evidence and documentation story", () => {
@@ -61,8 +69,9 @@ test("RU and EN tell the same fit, anti-fit, evidence and documentation story", 
     assert.equal(en.includes(document), true, `EN README does not link ${document}`);
   }
 
+  assert.match(ru, /конкретной версии результата/);
+  assert.match(en, /specific result version/);
   for (const readme of [ru, en]) {
-    assert.match(readme, /subject checksum|checked file checksum|checksum проверенного файла/);
     assert.match(readme, /Handoff|handoff/);
     assert.match(readme, /more process than value|больше процесса, чем пользы/);
   }

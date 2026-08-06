@@ -7,7 +7,7 @@ surface и только при сохранении evidence status.
 | Claim | Class | Evidence | Allowed surface | Status |
 |---|---|---|---|---|
 | Resume from canonical state | Core value | `orient` regression | README, plugin | mechanism proven; outcome unbenchmarked |
-| Verification bound to artifact checksum | Core value | integrity regressions | README, architecture | proven mechanism |
+| Verification bound to exact artifact version | Core value | integrity regressions | README, architecture | proven mechanism |
 | Complete generated handoff | Core value | handoff regression | README, architecture | proven mechanism |
 | Dry-run / explicit write boundary | Trust mechanism | engine tests | architecture | proven |
 | Plan-hash physical migration | Trust mechanism | migration regressions | architecture | proven |

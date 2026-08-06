@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="410" viewBox="0 0 1200 410" role="img" aria-labelledby="title desc">
-  <title id="title">Hypomnema evidence chain</title>
-  <desc id="desc">Sources become candidates, accepted decisions guide artifacts, and verification binds evidence to the exact artifact version before handoff.</desc>
+  <title id="title">Цепочка свидетельств Hypomnema</title>
+  <desc id="desc">Источники становятся кандидатами, принятые решения направляют создание артефактов, а проверка связывает основания с конкретной версией артефакта перед передачей работы.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#0b1020"/>
@@ -32,56 +32,56 @@
   <circle cx="1082" cy="73" r="138" fill="#8f79ff" opacity="0.08"/>
   <circle cx="116" cy="360" r="170" fill="#37c8ef" opacity="0.06"/>
 
-  <text x="54" y="50" class="eyebrow">CONTINUITY FOR LONG-RUNNING WORK</text>
-  <text x="54" y="84" class="brand">HYPOMNEMA · EVIDENCE CHAIN</text>
+  <text x="54" y="50" class="eyebrow">НЕПРЕРЫВНОСТЬ ДОЛГОЙ РАБОТЫ</text>
+  <text x="54" y="84" class="brand">HYPOMNEMA · ЦЕПОЧКА СВИДЕТЕЛЬСТВ</text>
 
   <path d="M 178 190 H 274 M 406 190 H 502 M 634 190 H 730 M 862 190 H 958" stroke="url(#line)" stroke-width="3" fill="none" marker-end="url(#arrow)" opacity="0.9"/>
 
   <g transform="translate(46 126)">
     <rect width="132" height="128" rx="18" fill="#121b31" stroke="#4facc8" stroke-width="1.5"/>
     <circle cx="66" cy="31" r="10" fill="#64d8ff" filter="url(#glow)"/>
-    <text x="66" y="66" text-anchor="middle" class="node-title">SOURCE</text>
-    <text x="66" y="90" text-anchor="middle" class="node-copy">provenance</text>
-    <text x="66" y="109" text-anchor="middle" class="node-copy">freshness</text>
+    <text x="66" y="66" text-anchor="middle" class="node-title">ИСТОЧНИК</text>
+    <text x="66" y="90" text-anchor="middle" class="node-copy">происхождение</text>
+    <text x="66" y="109" text-anchor="middle" class="node-copy">актуальность</text>
   </g>
 
   <g transform="translate(274 126)">
     <rect width="132" height="128" rx="18" fill="#171a36" stroke="#756cd0" stroke-width="1.5" stroke-dasharray="5 5"/>
     <path d="M66 21 L76 39 L56 39 Z" fill="#9588f4"/>
-    <text x="66" y="66" text-anchor="middle" class="node-title">CANDIDATE</text>
-    <text x="66" y="90" text-anchor="middle" class="node-copy">inference</text>
-    <text x="66" y="109" text-anchor="middle" class="node-copy">unknowns</text>
+    <text x="66" y="66" text-anchor="middle" class="node-title">КАНДИДАТ</text>
+    <text x="66" y="90" text-anchor="middle" class="node-copy">вывод</text>
+    <text x="66" y="109" text-anchor="middle" class="node-copy">неизвестное</text>
   </g>
 
   <g transform="translate(502 126)">
     <rect width="132" height="128" rx="18" fill="#1d1938" stroke="#aa8dea" stroke-width="1.5"/>
     <path d="M56 31 l7 7 15-17" fill="none" stroke="#c6a8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="66" y="66" text-anchor="middle" class="node-title">DECISION</text>
-    <text x="66" y="90" text-anchor="middle" class="node-copy">accepted</text>
-    <text x="66" y="109" text-anchor="middle" class="node-copy">with evidence</text>
+    <text x="66" y="66" text-anchor="middle" class="node-title">РЕШЕНИЕ</text>
+    <text x="66" y="90" text-anchor="middle" class="node-copy">принято</text>
+    <text x="66" y="109" text-anchor="middle" class="node-copy">есть основания</text>
   </g>
 
   <g transform="translate(730 126)">
     <rect width="132" height="128" rx="18" fill="#211b34" stroke="#d0a767" stroke-width="1.5"/>
     <rect x="54" y="21" width="24" height="22" rx="4" fill="none" stroke="#efc96b" stroke-width="2"/>
-    <text x="66" y="66" text-anchor="middle" class="node-title">ARTIFACT</text>
-    <text x="66" y="90" text-anchor="middle" class="node-copy">lineage</text>
-    <text x="66" y="109" text-anchor="middle" class="node-copy">exact version</text>
+    <text x="66" y="66" text-anchor="middle" class="node-title">АРТЕФАКТ</text>
+    <text x="66" y="90" text-anchor="middle" class="node-copy">связи</text>
+    <text x="66" y="109" text-anchor="middle" class="node-copy">точная версия</text>
   </g>
 
   <g transform="translate(958 126)">
     <rect width="196" height="128" rx="18" fill="#251e30" stroke="#efc96b" stroke-width="1.8"/>
     <circle cx="98" cy="31" r="12" fill="none" stroke="#efc96b" stroke-width="2"/>
     <path d="M91 31 l5 5 10-12" fill="none" stroke="#efc96b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="98" y="66" text-anchor="middle" class="node-title">VERIFICATION</text>
-    <text x="98" y="90" text-anchor="middle" class="node-copy">report / evidence</text>
-    <text x="98" y="109" text-anchor="middle" class="node-copy">current version</text>
+    <text x="98" y="66" text-anchor="middle" class="node-title">ПРОВЕРКА</text>
+    <text x="98" y="90" text-anchor="middle" class="node-copy">отчёт / основания</text>
+    <text x="98" y="109" text-anchor="middle" class="node-copy">текущая версия</text>
   </g>
 
   <path d="M 568 254 V 292" stroke="#bba7ff" stroke-width="2" marker-end="url(#arrow)"/>
   <rect x="238" y="300" width="724" height="72" rx="20" fill="url(#line)"/>
-  <text x="270" y="332" class="handoff">HANDOFF</text>
-  <text x="270" y="354" class="handoff-copy">goal · latest summary · decisions · outputs · verification · unresolved · next action</text>
+  <text x="270" y="332" class="handoff">ПЕРЕДАЧА</text>
+  <text x="270" y="354" class="handoff-copy">цель · итог · решения · результаты · проверка · нерешённое · следующий шаг</text>
   <path d="M 903 326 h22 v20 h-22" fill="none" stroke="#332b4d" stroke-width="2" stroke-linecap="round"/>
   <path d="M 893 336 h30" stroke="#332b4d" stroke-width="2" marker-end="url(#arrow)"/>
 </svg>
