@@ -27,14 +27,27 @@ Generated Markdown index, JSON registry и SQLite — производные pro
 candidate, human decision записывается отдельно, artifact связывается с задачей
 и sources, а verification относится к конкретной версии локального файла.
 
-Для `result=passed` engine требует хотя бы один `report` или `evidence`. Для
-локального source/artifact он пересчитывает SHA-256 перед записью и сохраняет
-`subject_sha256`. `validate` обнаруживает drift между файлом и manifest. Команда
-`refresh` обновляет facts и сбрасывает изменённый artifact в `not-verified`.
+Verification records разделены по уровню доказательности:
 
-Это evidence record, а не утверждение, что engine сам запустил внешний test
-command: достоверность переданного report/evidence остаётся ответственностью
-validator workflow.
+- `assurance=attested` создаётся ручной командой `record-verification` для
+  внешнего или исторического report/evidence. Такая запись не доказывает, что
+  engine сам запускал validator;
+- `assurance=executed` создаётся только `verify-run`. Dry-run показывает план и
+  ничего не исполняет. В режиме `--write` команда запускается напрямую с
+  `shell=false`, отдельными executable/argv, ограничением времени и выбранным
+  рабочим каталогом внутри workspace.
+
+`verify-run` вычисляет result из фактического exit code, signal и timeout,
+сохраняет SHA-256 полного stdout/stderr и ограниченные tails, снимает checksum
+subject и canonical manifests до и после запуска, затем атомарно связывает
+immutable report с verification manifest. Ненулевой exit code, signal, timeout,
+изменение subject или canonical manifests дают только `failed`. `validate`
+проверяет report checksum, согласованность report/manifest и запрещает ложный
+`passed` для `assurance=executed`.
+
+Для локального source/artifact engine сохраняет `subject_sha256`; `refresh`
+обновляет facts и сбрасывает изменённый artifact в `not-verified` без удаления
+предыдущего evidence.
 
 ## Handoff и восстановление
 
@@ -62,8 +75,22 @@ Artifact принадлежит задаче через поле `work_item` и�
 `workspace_explorer` и `workspace_verifier` — optional read-only роли для узких
 исследовательских и review-задач. Их результат является candidate evidence;
 решения, canonical writes и verification records остаются ответственностью
-главного агента. При отсутствии schema-valid результата главный агент выполняет
-детерминированные проверки сам и не записывает independent verdict.
+главного агента.
+
+Главный агент собирает bounded evidence capsule детерминированно: максимум три
+claims, девять точных line excerpts, SHA-256 исходных файлов, canonical hash и
+product-state hash. `workspace_verifier` получает capsule inline, не имеет права
+вызывать tools и возвращает один строгий JSON object protocol v2. Result
+принимается только при точном совпадении capsule path/hash, полного покрытия
+claims и повторной проверке текущих evidence bytes.
+
+Engine не выдаёт себя за API запуска Codex custom agents: spawn, wait и interrupt
+выполняет поддерживающий их клиент. Parent supervisor ограничивает общее ожидание
+60 секундами и при timeout прерывает verifier без retry. `SubagentStop` hook
+срабатывает только после остановки агента, поэтому проверяет результат, но не
+служит watchdog. Невалидный ответ сразу ведёт к deterministic fallback.
+Read-only sandbox остаётся защитным default, но не абсолютной изоляцией; основной
+барьер — capsule-only контракт без tool calls.
 
 В engine нет общего multi-process lock для canonical writers. Одновременные
 записывающие процессы не поддерживаются; orchestration должен сохранять правило

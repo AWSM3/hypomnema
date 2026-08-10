@@ -20,8 +20,15 @@ an unapproved change is expensive.
   iteration, accepted decisions, unresolved items, freshness warnings, and one
   next action from canonical workspace state.
 - **Verification belongs to a specific result version.** Hypomnema records
-  exactly which result was checked. If it changes, the previous verification
-  becomes stale until the new version is checked.
+  exactly which result was checked. When the agent runs a check through
+  Hypomnema, process completion and bounded diagnostics are captured
+  automatically. A non-zero exit, timeout, or changed subject cannot become a
+  successful verification.
+- **Bounded independent review.** For important conclusions, evidence collection
+  and judgment are separated. A small immutable selection is reviewed separately.
+  The calling agent bounds how long it waits. If the review times out or the
+  evidence is insufficient, work continues with the missing independent
+  confirmation stated explicitly.
 - **Handoff without repeated archaeology.** The generated handoff contains the
   goal and summary, decisions, outputs with authority/status, verification
   evidence, freshness warnings, unresolved items, and the next action.

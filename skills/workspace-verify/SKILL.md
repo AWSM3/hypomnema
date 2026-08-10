@@ -15,20 +15,40 @@ description: Deterministically validate a Hypomnema workspace contract, manifest
 2. Выполнить `rebuild`, если менялось каноническое состояние.
 3. Выполнить `validate`.
 4. Выполнить `audit` для paths, nested Git, caches и Markdown links.
-5. Запустить project-specific validators для изменённых артефактов.
-6. При failure исправить canonical source или generator, а не generated projection.
-7. Повторить проверки и зарегистрировать verification evidence.
+5. Для каждого исполняемого project-specific validator сначала выполнить
+   `verify-run` без `--write`: это только план, команда не запускается и state
+   не меняется. Затем повторить тот же вызов с `--write`.
+6. Считать `passed` только результатом `verify-run`: он выводится из exit code,
+   signal, timeout и стабильности subject/canonical manifests, сохраняет полный
+   SHA-256 stdout/stderr, ограниченные диагностические tails и immutable report.
+7. При failure исправить canonical source или generator, а не generated
+   projection. Failed run уже остаётся evidence и не переписывается.
+8. `record-verification` использовать только для внешнего или исторического
+   evidence; такая запись имеет assurance `attested`, а не `executed`.
 
 ```powershell
-node --test runtime/engine/workspace.test.mjs scripts/install-ai-workspace.test.mjs
+node --test runtime/engine/workspace.test.mjs runtime/engine/workspace.integrity.test.mjs runtime/engine/trust-runtime.test.mjs runtime/engine/verification-request.test.mjs runtime/engine/verifier-capsule.test.mjs runtime/engine/verifier-contract.test.mjs runtime/engine/verifier-cli.test.mjs runtime/engine/verify-run.test.mjs scripts/install-ai-workspace.test.mjs scripts/readme-diagrams.test.mjs scripts/readme-positioning.test.mjs skills/workspace-migrate/scripts/workspace-migrate.test.mjs
 node --check runtime/engine/workspace.mjs
+node --check runtime/engine/trust-runtime.mjs
+node --check runtime/engine/verification-runtime.mjs
+node --check runtime/engine/verifier-capsule-runtime.mjs
+node --check runtime/engine/verifier-result-runtime.mjs
 node --check scripts/install-ai-workspace.mjs
 # Затем выполнить доступные validators skill-creator и plugin-creator.
-.\.ai-workspace\engine\workspace.ps1 rebuild
-.\.ai-workspace\engine\workspace.ps1 validate
-.\.ai-workspace\engine\workspace.ps1 audit --write
 ```
 
+## Независимое суждение над evidence capsule
+
+После детерминированных tests главный агент создаёт bounded capsule командой
+`verifier-capsule`: сначала dry-run, затем `--write`. Одна capsule содержит не
+более трёх claims и девяти точных excerpts; больший review делится на несколько
+capsule. Verifier получает JSON capsule inline и не вызывает tools.
+
+Parent supervisor ждёт один ответ не более 60 секунд. Timeout, invalid JSON,
+`partial`, `blocked` или `stale` немедленно ведут к interrupt и deterministic
+fallback без retry. Результат проверяется только командой
+`verifier-check --file RESULT --capsule CAPSULE --expected-hash HASH`. Hook
+валидирует уже остановившегося агента и не является watchdog.
 ## Deterministic core
 
 Считать schema, link, identity, lifecycle, lineage, drift, checksum и idempotence проверками engine или специализированных scripts.
@@ -39,7 +59,10 @@ node --check scripts/install-ai-workspace.mjs
 
 ## Mutation boundary
 
-Не исправлять generated-файлы вручную. Не присваивать `passed`, если команда не запускалась или завершилась ошибкой. Записывать verification только после фактической проверки.
+Не исправлять generated-файлы вручную. Не подменять `verify-run` ручным
+`record-verification --result passed`: выполненная проверка должна иметь assurance
+`executed`. Не удалять и не перезаписывать immutable run report; повторный запуск
+получает новый verification id.
 
 ## Completion evidence
 

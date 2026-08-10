@@ -15,12 +15,22 @@ manifests, audit/state/generated или содержимое `work/**` в produc
 node --test `
   runtime/engine/workspace.test.mjs `
   runtime/engine/workspace.integrity.test.mjs `
+  runtime/engine/trust-runtime.test.mjs `
+  runtime/engine/verification-request.test.mjs `
+  runtime/engine/verifier-capsule.test.mjs `
+  runtime/engine/verifier-contract.test.mjs `
+  runtime/engine/verifier-cli.test.mjs `
+  runtime/engine/verify-run.test.mjs `
   skills/workspace-migrate/scripts/workspace-migrate.test.mjs `
   scripts/install-ai-workspace.test.mjs `
   scripts/readme-diagrams.test.mjs `
   scripts/readme-positioning.test.mjs
 
 node --check runtime/engine/workspace.mjs
+node --check runtime/engine/trust-runtime.mjs
+node --check runtime/engine/verification-runtime.mjs
+node --check runtime/engine/verifier-capsule-runtime.mjs
+node --check runtime/engine/verifier-result-runtime.mjs
 node --check scripts/install-ai-workspace.mjs
 node --check skills/workspace-migrate/scripts/workspace-migrate.mjs
 ```

@@ -662,6 +662,7 @@ test("product checkout folders are excluded from work-item discovery", () => {
       "examples",
       "assets/readme",
       "agents",
+      "hooks",
       "docs",
     ]) {
       fs.mkdirSync(path.join(root, dir), { recursive: true });
@@ -677,7 +678,7 @@ test("product checkout folders are excluded from work-item discovery", () => {
       "utf8",
     ));
     assert.deepEqual(report.items.map((item) => item.path), ["alpha", "beta"]);
-    for (const dir of ["runtime", "scripts", "skills", "templates", "examples", "assets", "agents", "docs"]) {
+    for (const dir of ["runtime", "scripts", "skills", "templates", "examples", "assets", "agents", "hooks", "docs"]) {
       assert.equal(report.excluded.includes(dir), true);
     }
   } finally {

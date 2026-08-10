@@ -49,6 +49,10 @@
     "verification_status": {
       "enum": ["not-verified", "passed", "failed", "warning"]
     },
+    "verification_assurance": {
+      "type": ["string", "null"],
+      "enum": ["attested", "executed", null]
+    },
     "id": {
       "minLength": 3,
       "type": "string"

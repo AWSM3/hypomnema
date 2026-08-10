@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "product_version": "0.4.0",
+  "product_version": "0.6.0",
   "profiles": {
     "reusable-template": {
       "status": "implemented",
@@ -20,6 +20,7 @@
         "assets/**",
         "agents/**",
         "skills/**",
+        "hooks/**",
         "runtime/engine/**",
         "runtime/schemas/**",
         "runtime/migrations/**",

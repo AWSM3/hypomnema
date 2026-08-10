@@ -7,9 +7,13 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const productRoot = path.resolve(here, "../../..");
 const migrationScript = path.join(here, "workspace-migrate.mjs");
-const engineSource = path.join(productRoot, "runtime", "engine", "workspace.mjs");
+const engineCandidates = [
+  path.resolve(here, "../../..", "runtime", "engine", "workspace.mjs"),
+  path.resolve(here, "../../../..", ".ai-workspace", "engine", "workspace.mjs"),
+];
+const engineSource = engineCandidates.find((candidate) => fs.existsSync(candidate));
+if (!engineSource) throw new Error(`Workspace engine not found in: ${engineCandidates.join(", ")}`);
 
 function runRaw(file, args, cwd) {
   return spawnSync(process.execPath, ["--no-warnings=ExperimentalWarning", file, ...args], {
@@ -33,7 +37,18 @@ function createWorkspace() {
   fs.writeFileSync(path.join(root, "alpha", ".git", "HEAD"), "ref: refs/heads/main\n", "utf8");
   fs.writeFileSync(path.join(root, "INDEX.md"), "[Alpha](alpha/README.md)\n", "utf8");
   run(engineSource, ["init", "--root", root, "--mode", "greenfield", "--id", "fixture", "--json"], root);
-  fs.copyFileSync(engineSource, path.join(root, ".ai-workspace", "engine", "workspace.mjs"));
+  for (const engineFile of [
+    "workspace.mjs",
+    "trust-runtime.mjs",
+    "verification-runtime.mjs",
+    "verifier-capsule-runtime.mjs",
+    "verifier-result-runtime.mjs",
+  ]) {
+    fs.copyFileSync(
+      path.join(path.dirname(engineSource), engineFile),
+      path.join(root, ".ai-workspace", "engine", engineFile),
+    );
+  }
   run(engineSource, [
     "register-work-item",
     "--root", root,

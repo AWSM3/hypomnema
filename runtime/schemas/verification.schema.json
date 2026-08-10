@@ -16,6 +16,18 @@
         "warning"
       ]
     },
+    "assurance": {
+      "enum": [
+        "attested",
+        "executed"
+      ]
+    },
+    "execution": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
     "report": {
       "type": [
         "string",

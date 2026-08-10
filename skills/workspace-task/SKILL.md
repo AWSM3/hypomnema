@@ -78,45 +78,49 @@ description: Orchestrate substantive engineering, operations, testing, analysis,
 ## Read-only субагенты
 
 Главный агент остаётся единственным writer и единственным интерфейсом
-пользователя. Если клиент поддерживает project-scoped custom agents, использовать
-две коробочные роли:
+пользователя. `workspace_explorer` можно использовать для узкого параллельного
+сбора evidence. `workspace_verifier` получает только заранее собранную evidence
+capsule и выносит независимое суждение без доступа к инструментам.
 
-- `workspace_explorer` — параллельный сбор evidence из независимых источников,
-  больших файлов, code paths или brownfield-областей;
-- `workspace_verifier` — независимая проверка существенных утверждений,
-  acceptance criteria, lineage и фактически выполненных тестов.
+Не делегировать субагентам intake, orient, решения, изменение manifests,
+`rebuild`, фиксацию verification, migration apply, Git-операции или внешние side
+effects. Не выполнять никаких мутаций, пока хотя бы один reader работает.
 
-Не делегировать им intake, orient, решения, изменение manifests, `rebuild`,
-фиксацию verification, migration apply, Git-операции или внешние side effects.
-Для одного простого источника не создавать субагента без пользы.
+Для `workspace_verifier` использовать fail-bounded цикл:
 
-Перед запуском:
+1. Главный агент сначала выполняет все детерминированные проверки и определяет
+   точные root-relative evidence paths и диапазоны строк.
+2. Создать JSON request с максимум тремя claims и суммарно девятью evidence
+   entries. Для большего review разбить claims на несколько независимых capsule.
+3. Выполнить `verifier-capsule --id ID --request PATH` без `--write`, проверить
+   план, затем повторить с `--write`. Capsule создаётся эксклюзивно в
+   `.ai-workspace/reports/verifier-capsules/` и не перезаписывается.
+4. Передать verifier полный JSON capsule inline, её root-relative path и
+   full-file SHA-256. Verifier не читает workspace, не вызывает tools и отвечает
+   ровно одним JSON object protocol v2.
+5. Ждать не более 60 секунд суммарно. Этот срок обеспечивает parent supervisor,
+   а не текст prompt и не `SubagentStop` hook. Hook не является watchdog. По
+   истечении срока прервать агента, не перезапускать его и перейти к
+   deterministic main-agent fallback.
+6. Сохранить ответ и выполнить
+   `verifier-check --file RESULT --capsule CAPSULE --expected-hash HASH`.
+   Принимается только `accepted: true`; result обязан
+   покрывать все claims и ссылаться только на evidence из указанной capsule.
+7. Hook проверяет лишь уже завершившийся ответ. Невалидный JSON немедленно ведёт
+   к fallback без correction loop.
+8. После результата или interrupt повторить `validate`; validator заново
+   проверяет canonical/product hashes, capsule hash, SHA-256 evidence-файлов и
+   точные excerpt bytes до возобновления мутаций.
 
-1. Получить текущий canonical hash через read-only `validate` и передать его в
-   задаче каждому reader.
-2. Дать узкий непересекающийся scope, конкретные вопросы и доступные evidence.
-3. Запустить независимых readers параллельно, если это сокращает критический путь.
-4. Не выполнять никаких мутаций, пока хотя бы один reader работает.
-
-Reader возвращает ровно один JSON object по контракту своей роли: snapshot,
-facts или claims, evidence с SHA-256, checks, unknowns, risks, один
-`recommended_next_action` и `mutation_attempted: false`. Результат является
-candidate evidence, а не решением и не verification record.
-
-После получения результата главный агент:
-
-1. Проверяет JSON и отсутствие попытки мутации.
-2. Повторяет `validate` и сверяет canonical hash.
-3. Повторно вычисляет SHA-256 использованных evidence-файлов.
-4. При расхождении считает ответ `stale` и не применяет его без повторного
-   чтения.
-5. Сам принимает решение, выполняет изменения и регистрирует evidence.
+При timeout, `partial`, `blocked`, `stale` или невалидном ответе явно фиксировать,
+что независимое подтверждение не получено. Ответ verifier является candidate
+evidence, а не решением и не verification record. Главный агент сам принимает
+решение, выполняет изменения и регистрирует реально проведённые проверки.
 
 Перед существенным завершением iteration, product release, migration или
 утверждением authoritative результата по возможности запускать
-`workspace_verifier`. Если custom agents недоступны, выполнить те же read-only
-проверки последовательно главным агентом и явно отметить отсутствие независимой
-проверки.
+`workspace_verifier`. Если custom agents недоступны, выполнить deterministic
+проверки главным агентом и явно отметить отсутствие независимой проверки.
 
 ## UI contract
 

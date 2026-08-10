@@ -50,8 +50,10 @@ function walkFiles(root) {
 
 function isInstallableRuntimeFile(source) {
   const rel = normalize(path.relative(runtimeRoot, source));
-  return rel === "engine/workspace.mjs"
-    || rel === "engine/workspace.ps1"
+  const engineModule = rel.startsWith("engine/")
+    && (rel.endsWith(".mjs") || rel.endsWith(".ps1"))
+    && !rel.endsWith(".test.mjs");
+  return engineModule
     || rel.startsWith("schemas/")
     || rel.startsWith("policies/")
     || (rel.startsWith("migrations/") && !rel.toLowerCase().endsWith(".md"));
@@ -267,6 +269,8 @@ if (!exists) {
     "state",
     "generated",
     "audit",
+    "reports/verifications",
+    "reports/verifier-capsules",
   ]) {
     changes.push({ action: "create-directory", target: path.join(controlRoot, dir) });
   }
@@ -357,6 +361,7 @@ const report = {
         ".ai-workspace/workspace.yaml",
         ".ai-workspace/manifests",
         ".ai-workspace/audit",
+        ".ai-workspace/reports",
         "AGENTS.md",
         ".codex/agents/*.toml outside product-managed names",
         "work/**",

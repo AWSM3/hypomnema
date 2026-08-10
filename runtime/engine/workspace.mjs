@@ -4,8 +4,21 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { DatabaseSync } from "node:sqlite";
+import {
+  buildVerificationRequest,
+  parseSingleJson,
+  publicVerificationPlan,
+  runVerificationRequest,
+  validateVerifierPayload,
+  verifierHookPayload,
+} from "./verification-runtime.mjs";
+import {
+  buildVerifierCapsule,
+  readAndValidateVerifierCapsule,
+  readVerifierCapsuleRequest,
+} from "./verifier-capsule-runtime.mjs";
 
-const ENGINE_VERSION = "0.4.0";
+const ENGINE_VERSION = "0.6.0";
 const CONTRACT_VERSION = "0.1";
 const SCHEMA_VERSION = 1;
 const ENTITY_DIRS = {
@@ -35,7 +48,7 @@ const DEFAULT_EXCLUDES = [
   ".obsidian", ".tmp",
 ];
 const PRODUCT_CHECKOUT_EXCLUDES = [
-  "runtime", "scripts", "skills", "templates", "examples", "assets", "agents", "docs",
+  "runtime", "scripts", "skills", "templates", "examples", "assets", "agents", "hooks", "docs",
 ];
 const WALK_EXCLUDES = new Set([
   ".git", ".hg", ".svn", "node_modules", ".venv", "venv", "__pycache__",
@@ -59,12 +72,13 @@ function parseArgs(argv) {
       || key === "record"
       || key === "clear-unknowns"
       || key === "full"
+      || key === "record-argv"
     ) {
       options[key] = true;
       continue;
     }
     const value = argv[i + 1];
-    if (value === undefined || value.startsWith("--")) {
+    if (value === undefined || (value.startsWith("--") && key !== "arg")) {
       throw new Error(`Для --${key} требуется значение`);
     }
     i += 1;
@@ -79,6 +93,7 @@ function parseArgs(argv) {
       || key === "source"
       || key === "option"
       || key === "consequence"
+      || key === "arg"
     ) {
       options[key] ??= [];
       options[key].push(value);
@@ -175,6 +190,11 @@ function atomicWrite(file, content) {
 
 function writeJson(file, value) {
   atomicWrite(file, serialize(value));
+}
+
+function writeExclusiveJson(file, value) {
+  ensureDir(path.dirname(file));
+  fs.writeFileSync(file, serialize(value), { encoding: "utf8", flag: "wx" });
 }
 
 function writeIfMissing(file, value) {
@@ -355,6 +375,7 @@ function schemaDefinitions() {
         sha256: { type: ["string", "null"] },
         size_bytes: { type: ["integer", "null"] },
         verification_status: { enum: ["not-verified", "passed", "failed", "warning"] },
+        verification_assurance: { type: ["string", "null"], enum: ["attested", "executed", null] },
       },
     },
     "iteration.schema.json": {
@@ -373,6 +394,8 @@ function schemaDefinitions() {
         ...base.properties,
         entity_type: { const: "verification" },
         result: { enum: ["passed", "failed", "warning"] },
+        assurance: { enum: ["attested", "executed"] },
+        execution: { type: ["object", "null"] },
         report: { type: ["string", "null"] },
         report_sha256: { type: ["string", "null"] },
         subject_sha256: { type: ["string", "null"] },
@@ -396,7 +419,10 @@ function schemaDefinitions() {
 function initWorkspace(root, options) {
   const c = control(root);
   for (const dir of Object.values(ENTITY_DIRS)) ensureDir(path.join(c, "manifests", dir));
-  for (const dir of ["policies", "schemas", "migrations", "state", "generated", "audit", "fixtures", "engine"]) {
+  for (const dir of [
+    "policies", "schemas", "migrations", "state", "generated", "audit", "fixtures", "engine",
+    "reports/verifications", "reports/verifier-capsules",
+  ]) {
     ensureDir(path.join(c, dir));
   }
   writeIfMissing(path.join(c, "workspace.yaml"), {
@@ -453,6 +479,16 @@ function initWorkspace(root, options) {
   });
   for (const [name, schema] of Object.entries(schemaDefinitions())) {
     writeIfMissing(path.join(c, "schemas", name), schema);
+  }
+  for (const name of [
+    "verifier-capsule-request.schema.json",
+    "verifier-capsule.schema.json",
+    "verifier-result.schema.json",
+  ]) {
+    const source = new URL(`../schemas/${name}`, import.meta.url);
+    if (fs.existsSync(source)) {
+      writeIfMissing(path.join(c, "schemas", name), JSON.parse(fs.readFileSync(source, "utf8")));
+    }
   }
   writeIfMissing(path.join(c, "migrations", "registry.json"), {
     format_version: 1,
@@ -741,6 +777,67 @@ function validateEvidenceChains(entities, root) {
   }
 
   for (const verification of verifications) {
+    if (verification.assurance !== undefined && !["attested", "executed"].includes(verification.assurance)) {
+      errors.push(`Verification ${verification.id}: invalid assurance`);
+    }
+    if (verification.assurance === "executed") {
+      if (!verification.report || !verification.report_sha256) {
+        errors.push(`Verification ${verification.id}: executed run requires an immutable report`);
+      }
+      const execution = verification.execution;
+      if (!execution || typeof execution !== "object" || Array.isArray(execution)) {
+        errors.push(`Verification ${verification.id}: executed run requires execution metadata`);
+      } else {
+        if (verification.subject_sha256 !== execution.subject_sha256_before) {
+          errors.push(`Verification ${verification.id}: subject checksum is not bound to execution start`);
+        }
+        if (verification.result === "passed") {
+          if (
+            execution.command_result !== "passed"
+            || execution.outcome !== "exited"
+            || execution.exit_code !== 0
+            || execution.signal !== null
+            || execution.timed_out !== false
+          ) {
+            errors.push(`Verification ${verification.id}: passed result contradicts process outcome`);
+          }
+          if (
+            execution.subject_stable !== true
+            || execution.subject_sha256_before !== execution.subject_sha256_after
+          ) {
+            errors.push(`Verification ${verification.id}: passed result has a changed subject`);
+          }
+          if (
+            execution.workspace_stable !== true
+            || execution.workspace_sha256_before !== execution.workspace_sha256_after
+          ) {
+            errors.push(`Verification ${verification.id}: passed result has changed canonical manifests`);
+          }
+        }
+      }
+      if (verification.report) {
+        const executedReportPath = path.isAbsolute(verification.report)
+          ? verification.report
+          : path.join(root, verification.report);
+        if (fs.existsSync(executedReportPath) && fs.statSync(executedReportPath).isFile()) {
+          try {
+            const executedReport = JSON.parse(fs.readFileSync(executedReportPath, "utf8"));
+            if (
+              executedReport.kind !== "hypomnema-verify-run"
+              || executedReport.verification_id !== verification.id
+              || executedReport.subject !== verification.subject
+              || executedReport.result !== verification.result
+              || executedReport.command?.command_sha256 !== execution?.command_sha256
+              || executedReport.subject_snapshot?.before?.sha256 !== verification.subject_sha256
+            ) {
+              errors.push(`Verification ${verification.id}: report content does not match its manifest`);
+            }
+          } catch (error) {
+            errors.push(`Verification ${verification.id}: report is not valid JSON: ${error.message}`);
+          }
+        }
+      }
+    }
     if (verification.result === "passed" && !verification.report && !(verification.evidence?.length)) {
       legacyPassedWithoutEvidence += 1;
     }
@@ -1256,6 +1353,7 @@ function registerArtifact(root, options) {
     size_bytes: stat.isFile() ? stat.size : null,
     authority: options.authority,
     verification_status: options.verification ?? "not-verified",
+    verification_assurance: null,
     evidence: options.evidence ?? [],
     decision: decisionRef ?? null,
     confirmed_by: options["confirmed-by"] ?? null,
@@ -1298,6 +1396,228 @@ function registerRelation(root, options) {
   return report("register-relation", { dry_run: !options.write, id, errors: [] }, options);
 }
 
+function verificationSubjectSnapshot(root, subject, { requireRegisteredCurrent = true } = {}) {
+  if (subject === "workspace") {
+    return {
+      kind: "canonical-manifests",
+      path: ".ai-workspace/manifests",
+      sha256: canonicalHash(loadManifests(root)),
+    };
+  }
+  const entry = findEntity(root, subject);
+  const localFile = localEntityFile(root, entry.entityType, entry.data);
+  if (localFile) {
+    if (requireRegisteredCurrent && !entry.data.sha256) {
+      throw new Error(`Subject has no checksum; run refresh --id ${subject} --write`);
+    }
+    if (requireRegisteredCurrent && entry.data.sha256 !== localFile.sha256) {
+      throw new Error(`Subject changed after registration; run refresh --id ${subject} --write`);
+    }
+    return {
+      kind: `${entry.entityType}-content`,
+      path: localFile.path,
+      sha256: localFile.sha256,
+    };
+  }
+  return {
+    kind: `${entry.entityType}-manifest`,
+    path: entry.rel,
+    sha256: sha256File(entry.file),
+  };
+}
+
+async function verifyRun(root, options) {
+  const request = buildVerificationRequest(root, options);
+  const verificationFile = manifestPath(root, "verification", request.id);
+  if (fs.existsSync(verificationFile)) throw new Error(`Verification already exists: ${request.id}`);
+  if (fs.existsSync(request.report_file)) throw new Error(`Verification report already exists: ${request.report_relative}`);
+
+  const subjectBefore = verificationSubjectSnapshot(root, request.subject);
+  const workspaceBefore = canonicalHash(loadManifests(root));
+  const plan = publicVerificationPlan(request);
+  if (!options.write) {
+    return report("verify-run", {
+      dry_run: true,
+      executed: false,
+      ...plan,
+      subject_sha256: subjectBefore.sha256,
+      workspace_sha256: workspaceBefore,
+      errors: [],
+    }, options);
+  }
+
+  const run = await runVerificationRequest({
+    root,
+    request,
+    subjectBefore,
+    workspaceBefore,
+    captureAfter: () => ({
+      subject: verificationSubjectSnapshot(root, request.subject, { requireRegisteredCurrent: false }),
+      workspace: canonicalHash(loadManifests(root)),
+    }),
+  });
+  const recorded = recordVerification(root, {
+    id: request.id,
+    subject: request.subject,
+    validator: request.validator,
+    version: request.tool_version ?? ENGINE_VERSION,
+    result: run.result,
+    report: request.report_relative,
+    evidence: [],
+    write: true,
+    _silent: true,
+    _assurance: "executed",
+    _execution: run.execution,
+    _parameters: {
+      command_sha256: request.command_sha256,
+      arg_count: request.args.length,
+      timeout_ms: request.timeout_ms,
+      tail_bytes: request.tail_bytes,
+    },
+    _subjectSnapshot: subjectBefore,
+  });
+  return report("verify-run", {
+    dry_run: false,
+    executed: true,
+    ...plan,
+    result: run.result,
+    outcome: run.execution.outcome,
+    exit_code: run.execution.exit_code,
+    timed_out: run.execution.timed_out,
+    subject_stable: run.execution.subject_stable,
+    workspace_stable: run.execution.workspace_stable,
+    report_sha256: recorded.report_sha256,
+    errors: run.result === "passed" ? [] : [`validator run failed: ${run.report.failure_reasons.join(", ")}`],
+  }, options);
+}
+
+async function readStdinUtf8(maxBytes = 1_048_576) {
+  const chunks = [];
+  let bytes = 0;
+  for await (const chunk of process.stdin) {
+    const value = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    bytes += value.length;
+    if (bytes > maxBytes) throw new Error(`stdin exceeds ${maxBytes} bytes`);
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
+function verifierCapsule(root, options) {
+  if (!options.id) throw new Error("verifier-capsule requires --id");
+  if (!options.request) throw new Error("verifier-capsule requires --request");
+  const request = readVerifierCapsuleRequest(root, options.request);
+  const currentCanonicalHash = canonicalHash(loadManifests(root));
+  const built = buildVerifierCapsule({
+    root,
+    id: options.id,
+    request: request.value,
+    canonicalHash: currentCanonicalHash,
+  });
+  const relative = `.ai-workspace/reports/verifier-capsules/${options.id}.json`;
+  const full = assertInside(root, path.join(root, relative));
+  if (fs.existsSync(full)) throw new Error(`Verifier capsule already exists: ${relative}`);
+  const payload = {
+    dry_run: !options.write,
+    capsule: relative,
+    capsule_sha256: built.sha256,
+    content_sha256: built.capsule.capsule_sha256,
+    canonical_hash: currentCanonicalHash,
+    product_state_sha256: built.capsule.workspace.product_state_sha256,
+    claims: built.capsule.claims.length,
+    evidence_count: built.evidence_count,
+    excerpt_bytes: built.excerpt_bytes,
+    request: request.path,
+    errors: [],
+  };
+  if (!options.write) return report("verifier-capsule", payload, options);
+  ensureDir(path.dirname(full));
+  fs.writeFileSync(full, built.serialized, { encoding: "utf8", flag: "wx" });
+  appendAudit(root, "verifier-capsule", [{ action: "create-verifier-capsule", path: relative }]);
+  return report("verifier-capsule", payload, options);
+}
+
+function verifierCheck(root, options) {
+  if (!options.file) throw new Error("verifier-check requires --file");
+  if (!options.capsule) throw new Error("verifier-check requires --capsule");
+  const full = assertInside(root, path.isAbsolute(options.file) ? options.file : path.join(root, options.file));
+  if (!fs.existsSync(full) || !fs.statSync(full).isFile()) {
+    throw new Error(`Verifier result file not found: ${options.file}`);
+  }
+  if (fs.statSync(full).size > 1_048_576) throw new Error("Verifier result exceeds 1048576 bytes");
+  let value;
+  try {
+    value = parseSingleJson(fs.readFileSync(full, "utf8"), "workspace_verifier result");
+  } catch (error) {
+    return report("verifier-check", {
+      accepted: false,
+      valid: false,
+      evidence_count: 0,
+      warnings: [],
+      errors: [error.message],
+    }, options);
+  }
+  const currentCanonicalHash = canonicalHash(loadManifests(root));
+  const expectedCanonicalHash = options["expected-hash"] ?? currentCanonicalHash;
+  let capsuleBinding;
+  try {
+    capsuleBinding = readAndValidateVerifierCapsule({
+      root,
+      capsulePath: options.capsule,
+      currentCanonicalHash,
+    });
+  } catch (error) {
+    return report("verifier-check", {
+      accepted: false,
+      valid: false,
+      evidence_count: 0,
+      warnings: [],
+      errors: [`Requested verifier capsule is invalid: ${error.message}`],
+    }, options);
+  }
+  const validation = validateVerifierPayload({
+    root,
+    value,
+    expectedCanonicalHash,
+    currentCanonicalHash,
+    expectedCapsulePath: capsuleBinding.path,
+    expectedCapsuleSha256: capsuleBinding.sha256,
+  });
+  const errors = [...validation.errors];
+  if (!validation.accepted && !errors.length) {
+    errors.push("Verifier result requires deterministic fallback");
+  }
+  return report("verifier-check", {
+    accepted: validation.accepted,
+    valid: validation.valid,
+    evidence_count: validation.evidence_count,
+    capsule: validation.capsule_path,
+    capsule_sha256: validation.capsule_sha256,
+    warnings: validation.warnings,
+    errors,
+  }, options);
+}
+
+async function verifierHook(root) {
+  let response;
+  try {
+    const input = parseSingleJson(await readStdinUtf8(), "SubagentStop input");
+    response = verifierHookPayload({
+      root,
+      input,
+      currentCanonicalHash: canonicalHash(loadManifests(root)),
+    });
+  } catch (error) {
+    response = {
+      continue: false,
+      stopReason: "Hypomnema verifier hook could not validate its input.",
+      systemMessage: `Run deterministic main-agent verification fallback. ${error.message}`,
+    };
+  }
+  process.stdout.write(serialize(response));
+  return { ok: true };
+}
+
 function recordVerification(root, options) {
   for (const required of ["subject", "validator", "result"]) {
     if (!options[required]) throw new Error(`record-verification требует --${required}`);
@@ -1311,15 +1631,8 @@ function recordVerification(root, options) {
   }
 
   const subjectEntry = options.subject !== "workspace" ? findEntity(root, options.subject) : null;
-  const subjectFile = subjectEntry
-    ? localEntityFile(root, subjectEntry.entityType, subjectEntry.data)
-    : null;
-  if (subjectFile && !subjectEntry.data.sha256) {
-    throw new Error(`Subject has no checksum; run refresh --id ${options.subject} --write`);
-  }
-  if (subjectFile && subjectEntry.data.sha256 !== subjectFile.sha256) {
-    throw new Error(`Subject changed after registration; run refresh --id ${options.subject} --write`);
-  }
+  const subjectSnapshot = options._subjectSnapshot
+    ?? verificationSubjectSnapshot(root, options.subject);
 
   const reportPath = options.report ? normalizeRel(options.report) : null;
   const reportFull = reportPath
@@ -1340,12 +1653,14 @@ function recordVerification(root, options) {
     subject: options.subject,
     validator: options.validator,
     validator_version: options.version ?? ENGINE_VERSION,
-    parameters: {},
+    assurance: options._assurance ?? "attested",
+    parameters: options._parameters ?? {},
     checked_at: nowIso(),
     result: options.result,
     report: reportPath,
     report_sha256: reportFull ? sha256File(reportFull) : null,
-    subject_sha256: subjectFile?.sha256 ?? null,
+    subject_sha256: subjectSnapshot.sha256,
+    execution: options._execution ?? null,
     evidence,
   };
   const file = manifestPath(root, "verification", id);
@@ -1357,6 +1672,7 @@ function recordVerification(root, options) {
       writeJson(subjectEntry.file, {
         ...subjectEntry.data,
         verification_status: options.result,
+        verification_assurance: manifest.assurance,
         updated_at: today(),
       });
       changes.push({
@@ -1367,13 +1683,16 @@ function recordVerification(root, options) {
     }
     appendAudit(root, "record-verification", changes);
   }
-  return report("record-verification", {
+  const payload = {
     dry_run: !options.write,
     id,
     result: options.result,
+    assurance: manifest.assurance,
+    report_sha256: manifest.report_sha256,
     subject_sha256: manifest.subject_sha256,
     errors: [],
-  }, options);
+  };
+  return options._silent ? { ok: true, kind: "record-verification", ...payload } : report("record-verification", payload, options);
 }
 
 function refreshFacts(root, options) {
@@ -1400,7 +1719,7 @@ function refreshFacts(root, options) {
       ...entry.data,
       ...facts,
       ...(entry.entityType === "artifact" && factsChanged
-        ? { verification_status: "not-verified" }
+        ? { verification_status: "not-verified", verification_assurance: null }
         : {}),
       facts_refreshed_at: nowIso(),
     });
@@ -2087,6 +2406,10 @@ Commands:
   register-artifact --id ID --title TITLE --kind KIND --path PATH --role ROLE --authority STATE [--work-item ID] [--source ID]... [--write]
   register-relation --from ID --to ID --type TYPE [--write]
   record-verification --subject ID|workspace --validator NAME --result RESULT [--report PATH] [--evidence REF]... [--write]
+  verify-run --subject ID|workspace --validator NAME --command EXECUTABLE [--arg VALUE]... [--cwd PATH] [--timeout-ms N] [--tail-bytes N] [--record-argv] [--write]
+  verifier-capsule --id ID --request PATH [--write] [--json]
+  verifier-check --file PATH --capsule PATH [--expected-hash SHA256] [--json]
+  verifier-hook
   refresh --id SOURCE_OR_ARTIFACT_ID [--write]
   accept-classification --id WORK_ITEM_ID [--method METHOD] [--evidence REF] [--write]
   rebuild [--json]
@@ -2161,6 +2484,22 @@ async function main() {
     case "record-verification":
       workspaceConfig(root);
       result = recordVerification(root, options);
+      break;
+    case "verify-run":
+      workspaceConfig(root);
+      result = await verifyRun(root, options);
+      break;
+    case "verifier-capsule":
+      workspaceConfig(root);
+      result = verifierCapsule(root, options);
+      break;
+    case "verifier-check":
+      workspaceConfig(root);
+      result = verifierCheck(root, options);
+      break;
+    case "verifier-hook":
+      workspaceConfig(root);
+      result = await verifierHook(root);
       break;
     case "refresh":
       workspaceConfig(root);

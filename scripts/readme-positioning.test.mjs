@@ -71,6 +71,12 @@ test("RU and EN tell the same fit, anti-fit, evidence and documentation story", 
 
   assert.match(ru, /конкретной версии результата/);
   assert.match(en, /specific result version/);
+  assert.match(ru, /Агент ограничивает время\s+ожидания/);
+  assert.match(en, /calling agent bounds how long it waits/i);
+  assert.doesNotMatch(ru, /жёсткий срок/);
+  assert.doesNotMatch(en, /own deadline/);
+  assert.match(ru, /отсутстви[еи] независимого подтверждения/);
+  assert.match(en, /missing independent\s+confirmation/);
   assert.match(ru, /передач[аиу]/);
   assert.match(en, /handoff/i);
   assert.match(ru, /больше процесса, чем\s+пользы/);
@@ -105,10 +111,27 @@ test("Russian README avoids internal English workflow jargon", () => {
   ]) assert.equal(ru.toLowerCase().includes(jargon.toLowerCase()), false, `English jargon returned: ${jargon}`);
 });
 
+test("0.5 and 0.6 documentation covers executed checks and bounded fallback", () => {
+  const upgrading = read("docs/UPGRADING.md");
+  const start = read("START_HERE.md");
+  const example = read("examples/oracle-to-postgresql/README.md");
+
+  assert.match(upgrading, /## Переход на 0\.5\.0/);
+  assert.match(upgrading, /verify-run/);
+  assert.match(upgrading, /attested/);
+  assert.match(upgrading, /## Переход на 0\.6\.0/);
+  assert.match(upgrading, /Ожидание отдельной проверки ограничивает вызывающий агент/);
+  assert.match(upgrading, /детерминированной проверке/);
+  assert.match(start, /Время ожидания ограничивает\s+вызывающий агент/);
+  assert.match(start, /независимое\s+подтверждение не получено/);
+  assert.match(example, /Сохрани фактически выполненный результат и основания/);
+  assert.match(example, /что проверено фактическим запуском/);
+});
+
 test("plugin metadata uses the Hypomnema identity and the same resume vocabulary", () => {
   const plugin = JSON.parse(read(".codex-plugin/plugin.json"));
   assert.equal(plugin.name, "hypomnema");
-  assert.equal(plugin.version, "0.4.0");
+  assert.equal(plugin.version, "0.6.0");
   assert.equal(plugin.interface.displayName, "Hypomnema");
   const copy = [
     plugin.description,
@@ -123,15 +146,17 @@ test("plugin metadata uses the Hypomnema identity and the same resume vocabulary
 
 test("reusable profile ships the public documentation and positioning guard", () => {
   const profiles = JSON.parse(read("profiles.json"));
-  assert.equal(profiles.product_version, "0.4.0");
+  assert.equal(profiles.product_version, "0.6.0");
   const include = profiles.profiles["reusable-template"].include;
   for (const entry of [
     "CONTRIBUTING.md",
     "docs/**",
+    "hooks/**",
     "scripts/readme-positioning.test.mjs",
   ]) assert.equal(include.includes(entry), true, `Profile does not include ${entry}`);
   for (const file of [
     "CONTRIBUTING.md",
+    "hooks/hooks.json",
     "docs/ARCHITECTURE.md",
     "docs/UPGRADING.md",
     "docs/POSITIONING.md",

@@ -49,7 +49,7 @@ test("install and update preserve instance-owned work while refreshing product f
       "--write",
     );
     assert.equal(installed.ok, true);
-    assert.equal(installed.product_version, "0.4.0");
+    assert.equal(installed.product_version, "0.6.0");
     const installedWorkspace = JSON.parse(fs.readFileSync(
       path.join(target, ".ai-workspace", "workspace.yaml"),
       "utf8",
@@ -72,11 +72,49 @@ test("install and update preserve instance-owned work while refreshing product f
 
     const verifierDefinition = fs.readFileSync(verifierInstalled, "utf8");
     assert.match(verifierDefinition, /^model = "gpt-5\.6-sol"$/m);
-    assert.match(verifierDefinition, /^model_reasoning_effort = "high"$/m);
+    assert.match(verifierDefinition, /^model_reasoning_effort = "medium"$/m);
     assert.match(verifierDefinition, /^sandbox_mode = "read-only"$/m);
     assert.match(verifierDefinition, /^approval_policy = "never"$/m);
+    assert.match(verifierDefinition, /Do not call tools/);
+    assert.match(verifierDefinition, /"protocol_version": 2/);
     assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "engine", "workspace.test.mjs")), false);
+    assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "engine", "trust-runtime.mjs")), true);
+    assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "engine", "verification-runtime.mjs")), true);
+    assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "engine", "verifier-capsule-runtime.mjs")), true);
+    assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "engine", "verifier-result-runtime.mjs")), true);
+    assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "schemas", "verifier-result.schema.json")), true);
+    assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "schemas", "verifier-capsule.schema.json")), true);
+    assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "schemas", "verifier-capsule-request.schema.json")), true);
+    assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "reports", "verifications")), true);
+    assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "reports", "verifier-capsules")), true);
     assert.equal(fs.existsSync(path.join(target, ".ai-workspace", "migrations", "README.md")), false);
+
+    const installedVerifyDry = runEngine(
+      target,
+      "verify-run",
+      "--id", "verify-installed-engine",
+      "--subject", "workspace",
+      "--validator", "installed-node",
+      "--command", process.execPath,
+      "--arg", "-e",
+      "--arg", "process.stdout.write('installed')",
+    );
+    assert.equal(installedVerifyDry.executed, false);
+    const installedReport = path.join(target, ".ai-workspace", "reports", "verifications", "verify-installed-engine.json");
+    assert.equal(fs.existsSync(installedReport), false);
+    const installedVerify = runEngine(
+      target,
+      "verify-run",
+      "--id", "verify-installed-engine",
+      "--subject", "workspace",
+      "--validator", "installed-node",
+      "--command", process.execPath,
+      "--arg", "-e",
+      "--arg", "process.stdout.write('installed')",
+      "--write",
+    );
+    assert.equal(installedVerify.result, "passed");
+    assert.equal(fs.existsSync(installedReport), true);
 
     const taskRoot = path.join(target, "work", "oracle-to-postgresql");
     fs.mkdirSync(taskRoot, { recursive: true });
@@ -102,6 +140,7 @@ test("install and update preserve instance-owned work while refreshing product f
       manifest: fs.readFileSync(manifestFile, "utf8"),
       artifact: fs.readFileSync(artifactFile, "utf8"),
       agents: fs.readFileSync(agentsFile, "utf8"),
+      verificationReport: fs.readFileSync(installedReport),
     };
 
     const installedEngine = path.join(target, ".ai-workspace", "engine", "workspace.mjs");
@@ -145,10 +184,12 @@ test("install and update preserve instance-owned work while refreshing product f
 
     assert.equal(updated.mode, "update");
     assert.equal(updated.preserved.includes("work/**"), true);
+    assert.equal(updated.preserved.includes(".ai-workspace/reports"), true);
     assert.equal(fs.readFileSync(workspaceFile, "utf8"), expected.workspace);
     assert.equal(fs.readFileSync(manifestFile, "utf8"), expected.manifest);
     assert.equal(fs.readFileSync(artifactFile, "utf8"), expected.artifact);
     assert.equal(fs.readFileSync(agentsFile, "utf8"), expected.agents);
+    assert.deepEqual(fs.readFileSync(installedReport), expected.verificationReport);
     assert.equal(fs.readFileSync(explorerInstalled, "utf8"), fs.readFileSync(explorerSource, "utf8"));
     assert.equal(fs.readFileSync(userAgent, "utf8"), userAgentContent);
     assert.equal(fs.existsSync(staleAgent), false);
@@ -162,7 +203,7 @@ test("install and update preserve instance-owned work while refreshing product f
       "utf8",
     ));
     assert.equal(productState.product_name, "hypomnema");
-    assert.equal(productState.product_version, "0.4.0");
+    assert.equal(productState.product_version, "0.6.0");
     assert.equal(
       productState.managed_files.some((entry) => entry.path === ".agents/skills/workspace-task/SKILL.md"),
       true,

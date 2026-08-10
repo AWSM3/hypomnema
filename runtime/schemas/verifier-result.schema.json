@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hypomnema.local/schemas/verifier-result.schema.json",
+  "title": "Hypomnema capsule-only workspace_verifier result protocol v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "agent",
+    "capsule",
+    "status",
+    "snapshot",
+    "verdict",
+    "claims",
+    "findings",
+    "checks",
+    "skipped_checks",
+    "unknowns",
+    "risks",
+    "refused_actions",
+    "recommended_next_action",
+    "mutation_attempted"
+  ],
+  "properties": {
+    "protocol_version": { "const": 2 },
+    "agent": { "const": "workspace_verifier" },
+    "capsule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "status": { "enum": ["ok", "partial", "blocked", "stale"] },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspace_root",
+        "canonical_hash_start",
+        "canonical_hash_end",
+        "product_state_sha256",
+        "stable"
+      ],
+      "properties": {
+        "workspace_root": { "type": "string", "minLength": 1 },
+        "canonical_hash_start": { "$ref": "#/$defs/hash" },
+        "canonical_hash_end": { "$ref": "#/$defs/hash" },
+        "product_state_sha256": {
+          "oneOf": [{ "$ref": "#/$defs/hash" }, { "type": "null" }]
+        },
+        "stable": { "type": "boolean" }
+      }
+    },
+    "verdict": { "enum": ["supported", "contradicted", "inconclusive"] },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claim_id", "claim", "result", "evidence", "gaps"],
+        "properties": {
+          "claim_id": { "type": "string", "minLength": 3, "maxLength": 128 },
+          "claim": { "type": "string", "minLength": 1, "maxLength": 1200 },
+          "result": { "enum": ["supported", "contradicted", "inconclusive"] },
+          "evidence": {
+            "type": "array",
+            "maxItems": 9,
+            "items": { "$ref": "#/$defs/evidence" }
+          },
+          "gaps": { "$ref": "#/$defs/stringArray" }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["severity", "finding", "evidence"],
+        "properties": {
+          "severity": { "enum": ["critical", "high", "medium", "low"] },
+          "finding": { "type": "string", "minLength": 1 },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 9,
+            "items": { "$ref": "#/$defs/evidence" }
+          }
+        }
+      }
+    },
+    "checks": { "type": "array", "maxItems": 0 },
+    "skipped_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["check", "reason"],
+        "properties": {
+          "check": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "unknowns": { "$ref": "#/$defs/stringArray" },
+    "risks": { "$ref": "#/$defs/stringArray" },
+    "refused_actions": { "$ref": "#/$defs/stringArray" },
+    "recommended_next_action": { "type": "string", "minLength": 1 },
+    "mutation_attempted": { "const": false }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "stringArray": { "type": "array", "items": { "type": "string" } },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "locator", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "locator": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/hash" }
+      }
+    }
+  }
+}

@@ -31,6 +31,18 @@
     повторно сверяет canonical hash и SHA-256 использованных evidence-файлов.
 16. `sandbox_mode = "read-only"` и `approval_policy = "never"` являются
     безопасными defaults, но не обещанием абсолютной изоляции при live override.
+17. Фактически запускаемые validators проводить через `verify-run`: dry-run без
+    исполнения, затем тот же вызов с `--write`. Ручной `record-verification`
+    остаётся attested evidence и не подменяет executed run.
+18. Evidence для `workspace_verifier` детерминированно собирать командой
+    `verifier-capsule`: не более трёх claims и девяти точных excerpts на capsule.
+19. Verifier получает capsule inline, не вызывает tools и возвращает один JSON
+    protocol v2. Parent supervisor ждёт не более 60 секунд, затем прерывает без
+    retry и выполняет deterministic fallback; hook не является watchdog.
+20. Ответ принимать только через `verifier-check --file ... --capsule ...`.
+    Невалидный, stale, partial или timed-out ответ немедленно требует fallback.
+21. `.ai-workspace/reports/**` является instance-owned evidence: product update
+    не удаляет и не перезаписывает эти файлы.
 
 Базовые команды:
 
